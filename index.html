@@ -3,35 +3,42 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Redes de Computadoras 2025 - Plataforma Interactiva</title>
+    <title>Redes de Computadoras 2025 - Plataforma de Instrumentación Interactiva</title>
+    <!-- Tailwind CSS para el diseño responsivo -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js para visualización interactiva de progreso -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <!-- Fuentes modernas de Google -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Fira+Code:wght@400;500;700&display=swap" rel="stylesheet">
     
-    <!-- Chosen Palette: Indigo and Slate Theme (Slate-50 for background, Indigo-600 for primary actions, Slate-800 for text, Teal-500 for accents) -->
-    <!-- Application Structure Plan: The application uses a dashboard-style SPA layout designed to transform a static syllabus into an exploratory tool. It features a sidebar navigation dividing content into three functional views: 1. 'Visión General' (Dashboard) provides high-level context, metadata (professor, period), and a visual breakdown of the course weight using a chart. 2. 'Explorador del Temario' (Unit Explorer) utilizes a master-detail pattern, preventing cognitive overload by allowing users to click a unit to reveal its specific subtopics dynamically. 3. 'Conexiones Clave' (Interactive Map) synthesizes concepts from Unit 2 (OSI) and Unit 3 (Devices) into a clickable matrix, enabling active learning by exploring relationships. -->
-    <!-- Visualization & Content Choices: Report Info: Syllabus structure -> Goal: Inform & Organize -> Viz: Doughnut Chart (Chart.js) -> Interaction: Hover for details -> Justification: Provides an immediate visual understanding of the 5 units' composition. Report Info: Detailed topics -> Goal: Organize -> Viz: Interactive Master-Detail list (HTML/JS) -> Interaction: Click to expand -> Justification: Makes a dense 27-item list easily navigable. Report Info: OSI Layers & Devices -> Goal: Relationships -> Viz: Interactive HTML Grid -> Interaction: Click layer to highlight devices -> Justification: Transforms static concepts into an exploratory learning exercise. Confirming NO SVG/Mermaid used. -->
+    <!-- Chosen Palette: Slate and Indigo Premium (Slate-50 background, Indigo-600/700 primary actions, Emerald-500 accents, Slate-800 typography) -->
+    <!-- Application Structure Plan: The platform uses a responsive left-sidebar layout for navigating key sections: 1. Dashboard (General view with global interactive progress, goals, and official syllabus metadata). 2. Explorer (Master-detail panel with interactive checkboxes that update state, activities of teaching/learning, and an integrated grading simulation engine for each unit). 3. IOS Simulator (Interactive mock CLI providing tutorial steps for configuring a Cisco Router). 4. Key Connections (OSI layers interactive hardware matrix). This structure keeps heavy academic material highly engaging, legible, and easy to consume. -->
+    <!-- Visualization & Content Choices: Report Info: Syllabus topics progress & detailed grading percentages -> Goal: Inform, Track & Compare -> Viz: Dynamic Doughnut charts representing completion vs pending and HTML range sliders -> Interaction: Live state updates saving to JS memory -> Justification: Active participation tools like grade calculation and topic tracking keep the syllabus relevant throughout the entire semester. Confirming NO SVG/Mermaid used. -->
     <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
 
     <style>
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #f8fafc; 
+            background-color: #f8fafc;
+        }
+        
+        .mono-font {
+            font-family: 'Fira Code', monospace;
         }
         
         .chart-container {
             position: relative;
             width: 100%;
-            max-width: 500px;
+            max-width: 480px;
             margin-left: auto;
             margin-right: auto;
-            height: 40vh;
-            max-height: 350px;
+            height: 280px;
+            max-height: 320px;
         }
 
         .view-section {
             display: none;
-            animation: fadeIn 0.4s ease-in-out;
+            animation: fadeIn 0.35s ease-out;
         }
 
         .view-section.active {
@@ -39,141 +46,337 @@
         }
 
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
+            from { opacity: 0; transform: translateY(8px); }
             to { opacity: 1; transform: translateY(0); }
         }
 
-        .nav-item.active {
+        .nav-item-active {
             background-color: #e0e7ff;
             color: #4f46e5;
             font-weight: 600;
             border-right: 4px solid #4f46e5;
         }
 
-        .unit-card {
-            transition: all 0.2s;
+        .tab-btn-active {
+            border-color: #4f46e5;
+            color: #4f46e5;
+            font-weight: 600;
         }
-        
-        .unit-card.selected {
+
+        .unit-card-btn.selected {
             border-color: #4f46e5;
             background-color: #f5f3ff;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 4px 12px -2px rgba(79, 70, 229, 0.12);
         }
 
-        .layer-btn.active-layer {
+        .layer-pill.active-layer {
             background-color: #4f46e5;
             color: white;
+            box-shadow: 0 4px 10px -2px rgba(79, 70, 229, 0.3);
         }
 
-        .device-box {
-            transition: all 0.3s ease;
-            opacity: 0.5;
-            transform: scale(0.95);
+        .device-card-box {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            opacity: 0.45;
+            transform: scale(0.96);
         }
 
-        .device-box.highlight {
+        .device-card-box.highlight {
             opacity: 1;
-            transform: scale(1.05);
+            transform: scale(1.04);
             border-color: #10b981;
             background-color: #ecfdf5;
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 10px 20px -5px rgba(16, 185, 129, 0.2);
+        }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
         }
     </style>
 </head>
 <body class="text-slate-800 h-screen flex flex-col md:flex-row overflow-hidden">
 
-    <nav class="w-full md:w-64 bg-white border-r border-slate-200 flex flex-col shadow-sm z-10 flex-shrink-0">
-        <div class="p-6 border-b border-slate-200">
-            <div class="text-2xl mb-2">🌐</div>
-            <h1 class="font-bold text-lg text-indigo-900 leading-tight">Redes de Computadoras</h1>
-            <p class="text-xs text-slate-500 mt-1 font-mono">SCD - 1021</p>
+    <!-- MENÚ DE NAVEGACIÓN LATERAL -->
+    <nav class="w-full md:w-68 bg-white border-r border-slate-200 flex flex-col shadow-sm z-10 flex-shrink-0">
+        <div class="p-5 border-b border-slate-200">
+            <div class="flex items-center gap-2 mb-2">
+                <span class="text-2xl">⚡</span>
+                <span class="text-xs font-bold uppercase tracking-wider text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded">Académico 2025</span>
+            </div>
+            <h1 class="font-extrabold text-lg text-slate-900 leading-tight">Redes de Computadoras</h1>
+            <p class="text-xs text-slate-500 font-mono mt-0.5">Clave Oficial: SCD-1021</p>
         </div>
-        <div class="flex flex-row md:flex-col overflow-x-auto md:overflow-visible p-4 gap-2 flex-grow">
-            <button onclick="app.navigate('dashboard')" id="nav-dashboard" class="nav-item active flex items-center gap-3 w-full text-left px-4 py-3 rounded-lg text-slate-600 hover:bg-slate-50 transition-colors whitespace-nowrap md:whitespace-normal">
-                <span class="text-xl">📊</span>
-                <span>Visión General</span>
+
+        <!-- Indicador de Progreso General Semestral -->
+        <div class="p-5 bg-slate-50 border-b border-slate-200">
+            <div class="flex justify-between items-center mb-1.5 text-xs font-bold text-slate-600 uppercase">
+                <span>Progreso del Curso</span>
+                <span id="sidebar-progress-percent">0%</span>
+            </div>
+            <div class="w-full bg-slate-200 rounded-full h-2.5 overflow-hidden">
+                <div id="sidebar-progress-bar" class="bg-indigo-600 h-2.5 rounded-full transition-all duration-500" style="width: 0%"></div>
+            </div>
+            <p class="text-[10px] text-slate-400 mt-1 text-center font-medium">Marcado interactivo en el temario</p>
+        </div>
+
+        <!-- Opciones de Navegación -->
+        <div class="flex flex-row md:flex-col overflow-x-auto md:overflow-visible p-3 gap-1 flex-grow">
+            <button onclick="app.navigate('dashboard')" id="nav-dashboard" class="nav-item-active flex items-center gap-3 w-full text-left px-4 py-3 rounded-lg text-slate-600 hover:bg-slate-50 transition-colors whitespace-nowrap md:whitespace-normal">
+                <span class="text-lg">📊</span>
+                <span class="text-sm font-medium">Visión General</span>
             </button>
             <button onclick="app.navigate('temario')" id="nav-temario" class="nav-item flex items-center gap-3 w-full text-left px-4 py-3 rounded-lg text-slate-600 hover:bg-slate-50 transition-colors whitespace-nowrap md:whitespace-normal">
-                <span class="text-xl">🗂️</span>
-                <span>Explorador del Temario</span>
+                <span class="text-lg">🗂️</span>
+                <span class="text-sm font-medium">Explorador de Unidades</span>
+            </button>
+            <button onclick="app.navigate('cli')" id="nav-cli" class="nav-item flex items-center gap-3 w-full text-left px-4 py-3 rounded-lg text-slate-600 hover:bg-slate-50 transition-colors whitespace-nowrap md:whitespace-normal">
+                <span class="text-lg">💻</span>
+                <span class="text-sm font-medium">Simulador IOS</span>
             </button>
             <button onclick="app.navigate('interactivo')" id="nav-interactivo" class="nav-item flex items-center gap-3 w-full text-left px-4 py-3 rounded-lg text-slate-600 hover:bg-slate-50 transition-colors whitespace-nowrap md:whitespace-normal">
-                <span class="text-xl">🔗</span>
-                <span>Conexiones Clave</span>
+                <span class="text-lg">🔗</span>
+                <span class="text-sm font-medium">Conexiones Clave</span>
             </button>
         </div>
-        <div class="hidden md:block p-6 border-t border-slate-200 bg-slate-50 text-xs text-slate-500">
-            Tecnológico Nacional de México<br>ITSNCG
+
+        <div class="hidden md:block p-4 border-t border-slate-200 bg-slate-50 text-center">
+            <p class="text-[10px] text-slate-500 font-semibold leading-tight uppercase">ITSNCG - Ing. Sistemas</p>
+            <p class="text-[9px] text-slate-400 mt-0.5">Nuevo Casas Grandes, Chih.</p>
         </div>
     </nav>
 
+    <!-- ÁREA DE CONTENIDO PRINCIPAL -->
     <main class="flex-1 h-full overflow-y-auto bg-slate-50 p-4 md:p-8 relative">
 
-        <section id="view-dashboard" class="view-section active max-w-5xl mx-auto">
-            <header class="mb-8">
-                <h2 class="text-3xl font-bold text-slate-900 mb-2">Visión General del Curso</h2>
-                <p class="text-slate-600 text-lg">Esta sección proporciona un resumen ejecutivo del programa de la asignatura. Aquí podrás entender la estructura general del curso, su peso académico distribuido en 5 unidades fundamentales y los datos de identificación del periodo lectivo, diseñados para preparar a los estudiantes en la arquitectura y administración de redes LAN.</p>
+        <!-- SECCIÓN 1: DASHBOARD DE BIENVENIDA -->
+        <section id="view-dashboard" class="view-section active max-w-5xl mx-auto space-y-6">
+            <header class="mb-6">
+                <h2 class="text-3xl font-black text-slate-900 tracking-tight">Instrumentación Didáctica 2025</h2>
+                <p class="text-slate-600 text-lg mt-1">Bienvenido a la plataforma interactiva para el programa analítico del curso. Esta sección te permite supervisar el avance integral del semestre, comprender los objetivos objetivos generales, revisar la bibliografía autorizada y visualizar gráficamente cómo se estructuran las 5 unidades del temario.</p>
             </header>
 
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-                <div class="bg-white rounded-xl p-6 shadow-sm border border-slate-100 flex flex-col justify-center">
-                    <span class="text-sm text-slate-500 uppercase tracking-wider font-semibold mb-1">Titular de la Materia</span>
-                    <span class="text-xl font-bold text-indigo-700">M.G.T.I Isaac Neftali Molina Cepeda</span>
+            <!-- Metadata Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div class="bg-white rounded-xl p-5 shadow-sm border border-slate-150 flex flex-col justify-between">
+                    <span class="text-xs text-slate-400 font-bold uppercase tracking-wider">Titular de la Materia</span>
+                    <span class="text-base font-bold text-indigo-700 mt-2">M.G.T.I Isaac Neftali Molina Cepeda</span>
                 </div>
-                <div class="bg-white rounded-xl p-6 shadow-sm border border-slate-100 flex flex-col justify-center">
-                    <span class="text-sm text-slate-500 uppercase tracking-wider font-semibold mb-1">Periodo Lectivo</span>
-                    <span class="text-xl font-bold text-slate-800">Agosto - Diciembre 2025</span>
+                <div class="bg-white rounded-xl p-5 shadow-sm border border-slate-150 flex flex-col justify-between">
+                    <span class="text-xs text-slate-400 font-bold uppercase tracking-wider">Periodo Académico</span>
+                    <span class="text-base font-bold text-slate-800 mt-2">Agosto - Diciembre 2025</span>
                 </div>
-                <div class="bg-white rounded-xl p-6 shadow-sm border border-slate-100 flex flex-col justify-center">
-                    <span class="text-sm text-slate-500 uppercase tracking-wider font-semibold mb-1">Total de Unidades</span>
-                    <div class="flex items-baseline gap-2">
-                        <span class="text-4xl font-black text-teal-500">5</span>
-                        <span class="text-slate-600 font-medium">módulos temáticos</span>
+                <div class="bg-white rounded-xl p-5 shadow-sm border border-slate-150 flex flex-col justify-between">
+                    <span class="text-xs text-slate-400 font-bold uppercase tracking-wider">Horas de Clase</span>
+                    <span class="text-base font-bold text-slate-800 mt-2">2 Teoría - 3 Práctica (5 Cred)</span>
+                </div>
+                <div class="bg-white rounded-xl p-5 shadow-sm border border-slate-150 flex flex-col justify-between">
+                    <span class="text-xs text-slate-400 font-bold uppercase tracking-wider">Temas Totales</span>
+                    <div class="flex items-baseline gap-1 mt-2">
+                        <span id="dashboard-total-count" class="text-2xl font-black text-indigo-600">27</span>
+                        <span class="text-xs text-slate-500 font-semibold">conceptos</span>
                     </div>
                 </div>
             </div>
 
-            <div class="bg-white rounded-xl shadow-sm border border-slate-100 p-6 md:p-8">
-                <h3 class="text-xl font-bold text-slate-800 mb-4 text-center">Distribución del Programa Analítico</h3>
-                <p class="text-center text-slate-500 mb-6 text-sm max-w-2xl mx-auto">El siguiente gráfico ilustra la proporción de temas que conforman cada unidad del curso, mostrando el énfasis en la planificación y el diseño respecto a los fundamentos teóricos.</p>
-                
-                <div class="chart-container">
-                    <canvas id="syllabusChart"></canvas>
+            <!-- Competencia General y Atributos -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Competencia General -->
+                <div class="lg:col-span-2 bg-gradient-to-br from-indigo-900 to-slate-900 text-white rounded-xl p-6 shadow-md flex flex-col justify-between relative overflow-hidden">
+                    <div class="z-10">
+                        <span class="text-xs font-bold uppercase tracking-wider text-indigo-300">Competencia de la Asignatura</span>
+                        <h3 class="text-xl md:text-2xl font-extrabold mt-3 leading-snug">
+                            "Diseña y elabora un proyecto de cableado estructurado aplicando normas y estándares vigentes para la solución de problemas de conectividad."
+                        </h3>
+                    </div>
+                    <p class="text-xs text-indigo-200 mt-6 font-mono z-10">✓ Alineado bajo estándares del CACEI</p>
+                </div>
+
+                <!-- Progreso Global -->
+                <div class="bg-white rounded-xl p-6 shadow-sm border border-slate-150 flex flex-col justify-between">
+                    <span class="text-xs text-slate-400 font-bold uppercase tracking-wider mb-2">Avance Académico Semestral</span>
+                    <div class="flex flex-col items-center justify-center py-4">
+                        <span id="dashboard-progress-big" class="text-5xl font-black text-slate-800">0%</span>
+                        <span class="text-xs text-slate-500 mt-1 font-semibold">Temas dominados</span>
+                    </div>
+                    <div class="text-[11px] text-slate-400 text-center leading-normal">
+                        Para actualizar, marca los subtemas completados dentro del menú <span class="font-semibold text-indigo-600 cursor-pointer" onclick="app.navigate('temario')">Explorador de Unidades</span>.
+                    </div>
+                </div>
+            </div>
+
+            <!-- Estructura Curricular Gráfica y Bibliografía -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- Gráfico de distribución de temas -->
+                <div class="bg-white rounded-xl shadow-sm border border-slate-150 p-6 flex flex-col justify-between">
+                    <div>
+                        <h4 class="font-extrabold text-slate-800 text-base">Distribución Temática y Avance de Estudio</h4>
+                        <p class="text-xs text-slate-500 mt-0.5">Proporción de temas correspondientes a cada módulo formativo.</p>
+                    </div>
+                    <div class="chart-container my-4">
+                        <canvas id="syllabusChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Bibliografía de Apoyo -->
+                <div class="bg-white rounded-xl shadow-sm border border-slate-150 p-6 flex flex-col justify-between">
+                    <div>
+                        <h4 class="font-extrabold text-slate-800 text-base mb-3">Fuentes Bibliográficas e Información</h4>
+                        <div class="space-y-3">
+                            <div class="p-3 bg-slate-50 rounded-lg border border-slate-100 flex gap-3">
+                                <span class="text-xl">📘</span>
+                                <div>
+                                    <h5 class="text-xs font-bold text-slate-700">Redes de Computadoras (5ta Edición)</h5>
+                                    <p class="text-[11px] text-slate-500">Andrew S. Tanenbaum (Pearson Educación) - Disponible en biblioteca</p>
+                                </div>
+                            </div>
+                            <div class="p-3 bg-slate-50 rounded-lg border border-slate-100 flex gap-3">
+                                <span class="text-xl">📕</span>
+                                <div>
+                                    <h5 class="text-xs font-bold text-slate-700">CCNA ICND2 Official Exam Certification Guide</h5>
+                                    <p class="text-[11px] text-slate-500">Wendell Odom (Cisco Press) - Recursos clave para Packet Tracer</p>
+                                </div>
+                            </div>
+                            <div class="p-3 bg-slate-50 rounded-lg border border-slate-100 flex gap-3">
+                                <span class="text-xl">📙</span>
+                                <div>
+                                    <h5 class="text-xs font-bold text-slate-700">Diseño de Redes Telemáticas</h5>
+                                    <p class="text-[11px] text-slate-500">Manuel Santos González (Editorial RA-MA) - Referencia de cableado</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <p class="text-[10px] text-slate-400 mt-4 italic leading-tight">Consulte el material de apoyo y manuales prácticos compartidos a través del canal oficial de Microsoft Teams.</p>
                 </div>
             </div>
         </section>
 
-        <section id="view-temario" class="view-section max-w-6xl mx-auto h-full flex flex-col">
-            <header class="mb-6 flex-shrink-0">
-                <h2 class="text-3xl font-bold text-slate-900 mb-2">Explorador del Temario</h2>
-                <p class="text-slate-600">Explora de manera interactiva el contenido detallado de las 5 unidades. Selecciona una unidad en el panel izquierdo para desplegar todos sus subtemas, competencias y estructura analítica en el panel derecho. Este formato facilita la consulta progresiva sin sobrecargar la lectura.</p>
+        <!-- SECCIÓN 2: EXPLORADOR DE UNIDADES DETALLADO -->
+        <section id="view-temario" class="view-section max-w-6xl mx-auto h-full flex flex-col space-y-4">
+            <header class="flex-shrink-0">
+                <h2 class="text-3xl font-black text-slate-900 tracking-tight">Explorador de Unidades y Planificación</h2>
+                <p class="text-slate-600 mt-1">Este entorno interactivo te permite analizar con precisión cada unidad del programa. Explora la competencia específica, utiliza el **simulador de calificación final** basado en ponderaciones reales de clase, y marca tus temas estudiados para ver cómo se modifica tu porcentaje global al instante.</p>
             </header>
 
-            <div class="flex flex-col lg:flex-row gap-6 flex-1 min-h-0">
-                <div class="w-full lg:w-1/3 flex flex-col gap-3 overflow-y-auto pr-2" id="unit-list-container">
+            <div class="flex flex-col lg:flex-row gap-6 flex-grow min-h-0 overflow-hidden">
+                <!-- Menú Izquierdo de Unidades -->
+                <div class="w-full lg:w-5/12 flex flex-col gap-3 overflow-y-auto pr-1" id="unit-cards-container">
+                    <!-- Dinámico -->
                 </div>
 
-                <div class="w-full lg:w-2/3 bg-white rounded-xl shadow-sm border border-slate-200 p-6 md:p-8 overflow-y-auto">
-                    <div id="unit-detail-empty" class="h-full flex flex-col items-center justify-center text-slate-400">
+                <!-- Detalle de Unidad con Tabs -->
+                <div class="w-full lg:w-7/12 bg-white rounded-xl shadow-md border border-slate-200 flex flex-col overflow-hidden">
+                    <div id="detail-empty-state" class="p-12 flex flex-col items-center justify-center h-full text-slate-400 text-center">
                         <span class="text-6xl mb-4">👈</span>
-                        <p class="text-lg font-medium">Selecciona una unidad para ver los detalles</p>
+                        <h4 class="text-lg font-bold">Selecciona una unidad temática</h4>
+                        <p class="text-sm mt-1 max-w-xs">Haz clic en cualquiera de las 5 unidades para analizar sus temas, competencias, actividades sugeridas y ponderación de evaluación.</p>
                     </div>
-                    
-                    <div id="unit-detail-content" class="hidden">
-                        <div class="flex items-center gap-4 mb-6 pb-6 border-b border-slate-100">
-                            <div id="detail-icon" class="w-16 h-16 rounded-2xl bg-indigo-50 flex items-center justify-center text-3xl shadow-inner">
-                            </div>
-                            <div>
-                                <h4 id="detail-unit-num" class="text-indigo-600 font-bold tracking-wide uppercase text-sm mb-1"></h4>
-                                <h3 id="detail-title" class="text-2xl font-bold text-slate-900"></h3>
+
+                    <div id="detail-active-state" class="hidden flex flex-col h-full overflow-hidden">
+                        <!-- Cabecera de Detalle -->
+                        <div class="p-6 border-b border-slate-150 bg-slate-50 flex items-center justify-between">
+                            <div class="flex items-center gap-4">
+                                <span id="active-unit-icon" class="text-3xl p-2 bg-white rounded-xl shadow-sm border border-slate-100">🚀</span>
+                                <div>
+                                    <span id="active-unit-label" class="text-xs font-bold text-indigo-600 uppercase tracking-wider">Unidad 1</span>
+                                    <h3 id="active-unit-title" class="text-xl font-extrabold text-slate-950">Introducción a Redes de Datos</h3>
+                                </div>
                             </div>
                         </div>
-                        
-                        <div class="space-y-6">
-                            <div>
-                                <h5 class="text-sm font-bold text-slate-400 uppercase tracking-wider mb-4">Subtemas correspondientes</h5>
-                                <ul id="detail-topics" class="space-y-3">
-                                </ul>
+
+                        <!-- Barra de Navegación de Tabs Internos -->
+                        <div class="flex border-b border-slate-200 bg-white px-6">
+                            <button onclick="app.switchTab('temario')" id="tab-temario" class="tab-btn-active py-3 px-4 border-b-2 border-transparent text-sm font-semibold text-slate-600 hover:text-indigo-600 transition-colors">
+                                Temas & Progreso
+                            </button>
+                            <button onclick="app.switchTab('evaluacion')" id="tab-evaluacion" class="py-3 px-4 border-b-2 border-transparent text-sm font-semibold text-slate-600 hover:text-indigo-600 transition-colors">
+                                Evaluación e Instrumentación
+                            </button>
+                            <button onclick="app.switchTab('actividades')" id="tab-actividades" class="py-3 px-4 border-b-2 border-transparent text-sm font-semibold text-slate-600 hover:text-indigo-600 transition-colors">
+                                Actividades de Clase
+                            </button>
+                        </div>
+
+                        <!-- Panel de Contenido Desplazable -->
+                        <div class="p-6 overflow-y-auto flex-1 space-y-6">
+                            <!-- TAB: Temas & Progreso -->
+                            <div id="panel-temario" class="tab-panel space-y-4">
+                                <div class="bg-indigo-50 border-l-4 border-indigo-600 p-4 rounded-r-xl">
+                                    <h5 class="text-xs font-bold text-indigo-700 uppercase tracking-wide">Competencia Específica</h5>
+                                    <p id="active-unit-competencia" class="text-xs font-semibold text-slate-700 mt-1 leading-relaxed">
+                                        Analiza las características y clasificación de las topologías de redes para seleccionar la más adecuada de acuerdo a las necesidades.
+                                    </p>
+                                </div>
+                                <div class="space-y-2">
+                                    <h5 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Desglose de Temas de Estudio</h5>
+                                    <div id="active-unit-topics-list" class="space-y-2">
+                                        <!-- Dinámico -->
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- TAB: Evaluación e Instrumentación -->
+                            <div id="panel-evaluacion" class="tab-panel hidden space-y-6">
+                                <div class="flex items-center justify-between">
+                                    <h5 class="text-xs font-bold text-slate-400 uppercase tracking-wider">Criterios de Evaluación y Calificación</h5>
+                                    <span class="text-xs text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-full font-bold">Total: 100%</span>
+                                </div>
+
+                                <!-- Simulador interactivo de notas de clase -->
+                                <div class="bg-slate-50 border border-slate-200 rounded-xl p-5">
+                                    <div class="flex justify-between items-center mb-3 border-b border-slate-200 pb-2">
+                                        <div>
+                                            <h6 class="text-xs font-bold text-slate-800">Simulador de Calificación Estimada</h6>
+                                            <p class="text-[10px] text-slate-500">Mueve los controles para predecir tu nota de la unidad.</p>
+                                        </div>
+                                        <div class="text-right">
+                                            <span id="grade-calc-total" class="text-2xl font-black text-indigo-600">0 / 100</span>
+                                            <p id="grade-calc-status" class="text-[9px] text-red-500 font-bold uppercase mt-0.5">Reprobado</p>
+                                        </div>
+                                    </div>
+
+                                    <div id="grade-sliders-container" class="space-y-3.5">
+                                        <!-- Dinámico según ponderación de cada unidad -->
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- TAB: Actividades Académicas -->
+                            <div id="panel-actividades" class="tab-panel hidden space-y-6">
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <!-- Aprendizaje -->
+                                    <div class="bg-blue-50/50 border border-blue-100 rounded-xl p-4">
+                                        <div class="flex items-center gap-2 mb-3">
+                                            <span class="text-lg">🧑‍💻</span>
+                                            <h5 class="text-xs font-bold text-blue-900 uppercase tracking-wider">Actividades de Aprendizaje</h5>
+                                        </div>
+                                        <ul id="active-unit-learning-activities" class="space-y-2 text-xs text-blue-950 font-medium list-disc list-inside">
+                                            <!-- Dinámico -->
+                                        </ul>
+                                    </div>
+
+                                    <!-- Enseñanza -->
+                                    <div class="bg-indigo-50/50 border border-indigo-100 rounded-xl p-4">
+                                        <div class="flex items-center gap-2 mb-3">
+                                            <span class="text-lg">👨‍🏫</span>
+                                            <h5 class="text-xs font-bold text-indigo-900 uppercase tracking-wider">Actividades de Enseñanza</h5>
+                                        </div>
+                                        <ul id="active-unit-teaching-activities" class="space-y-2 text-xs text-indigo-950 font-medium list-disc list-inside">
+                                            <!-- Dinámico -->
+                                        </ul>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -181,69 +384,147 @@
             </div>
         </section>
 
-        <section id="view-interactivo" class="view-section max-w-5xl mx-auto">
-            <header class="mb-8">
-                <h2 class="text-3xl font-bold text-slate-900 mb-2">Conexiones Clave: OSI y Dispositivos</h2>
-                <p class="text-slate-600 text-lg">Esta herramienta interactiva conecta los conceptos teóricos de la Unidad 2 (Modelo OSI) con el hardware práctico de la Unidad 3 (Dispositivos de Red). Haz clic en las diferentes capas del modelo OSI a la izquierda para identificar qué dispositivos operan en ese nivel específico.</p>
+        <!-- SECCIÓN 3: INTERACTIVE IOS TERMINAL -->
+        <section id="view-cli" class="view-section max-w-5xl mx-auto space-y-6">
+            <header class="mb-6">
+                <h2 class="text-3xl font-black text-slate-900 tracking-tight">Simulador IOS de Dispositivos (Cisco Mock)</h2>
+                <p class="text-slate-600 mt-1">Este simulador de terminal de comandos te ayuda a comprender de manera práctica la configuración básica de enrutadores y conmutadores (IOS) bajo el entorno oficial de Cisco Packet Tracer estudiado en clase. Utiliza los tutoriales interactivos para guiarte en el proceso de configuración del dispositivo.</p>
             </header>
 
-            <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-8">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Panel de Tutoriales -->
+                <div class="lg:col-span-1 bg-white rounded-xl shadow-sm border border-slate-200 p-5 flex flex-col justify-between">
+                    <div>
+                        <h4 class="font-bold text-slate-800 text-base mb-3">Guías de Configuración IOS</h4>
+                        <div class="space-y-2">
+                            <button onclick="app.setTutorial(1)" id="tut-1" class="w-full text-left p-3 rounded-lg border-2 border-slate-100 hover:border-indigo-200 bg-slate-50 transition-all">
+                                <span class="text-xs font-extrabold text-indigo-600 uppercase tracking-wide block">Paso 1</span>
+                                <span class="text-xs font-bold text-slate-700 leading-tight">Acceder al Modo Privilegiado y Configurar Hostname</span>
+                            </button>
+                            <button onclick="app.setTutorial(2)" id="tut-2" class="w-full text-left p-3 rounded-lg border-2 border-slate-100 hover:border-indigo-200 bg-slate-50 transition-all">
+                                <span class="text-xs font-extrabold text-indigo-600 uppercase tracking-wide block">Paso 2</span>
+                                <span class="text-xs font-bold text-slate-700 leading-tight">Configurar IP en Interfaz FastEthernet0/0</span>
+                            </button>
+                            <button onclick="app.setTutorial(3)" id="tut-3" class="w-full text-left p-3 rounded-lg border-2 border-slate-100 hover:border-indigo-200 bg-slate-50 transition-all">
+                                <span class="text-xs font-extrabold text-indigo-600 uppercase tracking-wide block">Paso 3</span>
+                                <span class="text-xs font-bold text-slate-700 leading-tight">Verificar Estado de la Interfaz</span>
+                            </button>
+                        </div>
+                    </div>
                     
+                    <div class="mt-4 p-4 bg-indigo-50 border border-indigo-100 rounded-lg text-xs">
+                        <strong class="text-indigo-900 block mb-1">Comandos Disponibles:</strong>
+                        <ul class="grid grid-cols-2 gap-1 text-indigo-950 font-mono text-[10px]">
+                            <li>• enable</li>
+                            <li>• configure terminal</li>
+                            <li>• hostname [name]</li>
+                            <li>• interface f0/0</li>
+                            <li>• ip address [ip] [mask]</li>
+                            <li>• no shutdown</li>
+                            <li>• show ip int brief</li>
+                            <li>• exit</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Terminal Block -->
+                <div class="lg:col-span-2 bg-slate-900 rounded-xl shadow-lg border border-slate-800 flex flex-col h-[480px]">
+                    <!-- Terminal Bar -->
+                    <div class="bg-slate-850 px-4 py-2 border-b border-slate-800 flex items-center justify-between flex-shrink-0">
+                        <div class="flex items-center gap-2">
+                            <span class="w-3 h-3 bg-red-500 rounded-full"></span>
+                            <span class="w-3 h-3 bg-yellow-400 rounded-full"></span>
+                            <span class="w-3 h-3 bg-green-500 rounded-full"></span>
+                            <span class="text-xs text-slate-400 font-bold font-mono ml-2">Console Session (Router)</span>
+                        </div>
+                        <span class="text-[10px] text-slate-500 uppercase font-mono font-bold">Packet Tracer Mock</span>
+                    </div>
+
+                    <!-- Terminal Output Desplazable -->
+                    <div id="cli-output" class="p-5 overflow-y-auto flex-1 font-mono text-xs text-slate-300 space-y-1.5 scrollbar-thin">
+                        <!-- Líneas cargadas por script -->
+                    </div>
+
+                    <!-- Terminal Input Row -->
+                    <div class="bg-slate-950 px-4 py-3 border-t border-slate-800 flex items-center gap-2 flex-shrink-0">
+                        <span id="cli-prompt" class="text-green-400 font-mono text-xs font-bold">Router&gt;</span>
+                        <input type="text" id="cli-input-field" class="flex-1 bg-transparent border-none text-slate-200 font-mono text-xs focus:ring-0 focus:outline-none" placeholder="Ingresa un comando de red..." autocomplete="off">
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECCIÓN 4: CONEXIONES CLAVE (OSI & HARDWARE MATRIX) -->
+        <section id="view-interactivo" class="view-section max-w-5xl mx-auto space-y-6">
+            <header class="mb-6">
+                <h2 class="text-3xl font-black text-slate-900 tracking-tight">Conexiones Clave: OSI y Dispositivos de Red</h2>
+                <p class="text-slate-600 mt-1">Esta herramienta didáctica interactiva relaciona directamente el Modelo de Referencia OSI (Unidad 2) con el hardware de red (Unidad 3) de forma tangible. Utiliza el panel izquierdo para seleccionar capas del modelo y observar qué dispositivos de hardware operan de manera real en cada nivel.</p>
+            </header>
+
+            <div class="bg-white rounded-xl shadow-md border border-slate-200 p-6 md:p-8">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+                    
+                    <!-- Panel de selección de capas -->
                     <div class="space-y-4">
-                        <h3 class="font-bold text-slate-800 text-xl mb-4 flex items-center gap-2">
-                            <span>📑</span> Unidad 2: Capas del Modelo
+                        <h3 class="font-bold text-slate-800 text-lg mb-2 flex items-center gap-2">
+                            <span>📑</span> Capas del Modelo OSI (Unidad 2)
                         </h3>
                         <div class="flex flex-col gap-2">
-                            <button onclick="app.highlightDevices('superior')" id="layer-superior" class="layer-btn w-full text-left px-6 py-4 rounded-lg border-2 border-slate-200 hover:border-indigo-400 text-slate-700 font-medium transition-all">
-                                Capas Superiores (Aplicación, Presentación, Sesión)
+                            <button onclick="app.highlightDevices('superior')" id="layer-superior" class="layer-pill w-full text-left px-5 py-3.5 rounded-xl border border-slate-200 hover:border-indigo-400 text-slate-700 text-sm font-semibold transition-all">
+                                Capas 5, 6, 7: Aplicación, Presentación y Sesión
                             </button>
-                            <button onclick="app.highlightDevices('transporte')" id="layer-transporte" class="layer-btn w-full text-left px-6 py-4 rounded-lg border-2 border-slate-200 hover:border-indigo-400 text-slate-700 font-medium transition-all">
-                                Capa de Transporte
+                            <button onclick="app.highlightDevices('transporte')" id="layer-transporte" class="layer-pill w-full text-left px-5 py-3.5 rounded-xl border border-slate-200 hover:border-indigo-400 text-slate-700 text-sm font-semibold transition-all">
+                                Capa 4: Transporte (Protocolos de Tránsito)
                             </button>
-                            <button onclick="app.highlightDevices('red')" id="layer-red" class="layer-btn w-full text-left px-6 py-4 rounded-lg border-2 border-slate-200 hover:border-indigo-400 text-slate-700 font-medium transition-all">
-                                Capa de Red
+                            <button onclick="app.highlightDevices('red')" id="layer-red" class="layer-pill w-full text-left px-5 py-3.5 rounded-xl border border-slate-200 hover:border-indigo-400 text-slate-700 text-sm font-semibold transition-all">
+                                Capa 3: Red (Enrutamiento Lógico)
                             </button>
-                            <button onclick="app.highlightDevices('enlace')" id="layer-enlace" class="layer-btn w-full text-left px-6 py-4 rounded-lg border-2 border-slate-200 hover:border-indigo-400 text-slate-700 font-medium transition-all">
-                                Capa de Enlace de Datos
+                            <button onclick="app.highlightDevices('enlace')" id="layer-enlace" class="layer-pill w-full text-left px-5 py-3.5 rounded-xl border border-slate-200 hover:border-indigo-400 text-slate-700 text-sm font-semibold transition-all">
+                                Capa 2: Enlace de Datos (Direccionamiento Físico MAC)
                             </button>
-                            <button onclick="app.highlightDevices('fisica')" id="layer-fisica" class="layer-btn w-full text-left px-6 py-4 rounded-lg border-2 border-slate-200 hover:border-indigo-400 text-slate-700 font-medium transition-all">
-                                Capa Física
+                            <button onclick="app.highlightDevices('fisica')" id="layer-fisica" class="layer-pill w-full text-left px-5 py-3.5 rounded-xl border border-slate-200 hover:border-indigo-400 text-slate-700 text-sm font-semibold transition-all">
+                                Capa 1: Física (Señales de Medios Físicos)
                             </button>
                         </div>
                     </div>
 
-                    <div class="bg-slate-50 p-6 rounded-xl border border-slate-200">
-                        <h3 class="font-bold text-slate-800 text-xl mb-6 flex items-center gap-2">
-                            <span>🛠️</span> Unidad 3: Dispositivos de Red
+                    <!-- Panel de Dispositivos correspondientes -->
+                    <div class="bg-slate-50 p-6 rounded-2xl border border-slate-200">
+                        <h3 class="font-bold text-slate-800 text-lg mb-4 flex items-center gap-2">
+                            <span>🛠️</span> Dispositivos Reales (Unidad 3)
                         </h3>
                         <div class="grid grid-cols-2 gap-4">
-                            <div class="device-box text-center p-4 rounded-lg border-2 border-slate-200 bg-white" data-layer="superior">
-                                <div class="text-3xl mb-2">🛡️</div>
-                                <div class="font-bold text-sm text-slate-800">Firewalls de Aplicación</div>
-                                <div class="text-xs text-slate-500 mt-1">Proxies, Gateways</div>
+                            <!-- Superior -->
+                            <div class="device-card-box text-center p-4 rounded-xl border border-slate-200 bg-white" data-layer="superior">
+                                <div class="text-3xl mb-1.5">🛡️</div>
+                                <div class="font-extrabold text-xs text-slate-800">Firewalls Aplicativos</div>
+                                <div class="text-[10px] text-slate-400 mt-1">Proxies, Gateways de Capa de Aplicación</div>
                             </div>
                             
-                            <div class="device-box text-center p-4 rounded-lg border-2 border-slate-200 bg-white" data-layer="red">
-                                <div class="text-3xl mb-2">🛣️</div>
-                                <div class="font-bold text-sm text-slate-800">Routers</div>
-                                <div class="text-xs text-slate-500 mt-1">Switches Capa 3, Encaminadores</div>
+                            <!-- Red -->
+                            <div class="device-card-box text-center p-4 rounded-xl border border-slate-200 bg-white" data-layer="red">
+                                <div class="text-3xl mb-1.5">🛣️</div>
+                                <div class="font-extrabold text-xs text-slate-800">Routers y Switches L3</div>
+                                <div class="text-[10px] text-slate-400 mt-1">Enrutadores inteligentes con direccionamiento IP</div>
                             </div>
                             
-                            <div class="device-box text-center p-4 rounded-lg border-2 border-slate-200 bg-white" data-layer="enlace">
-                                <div class="text-3xl mb-2">🔄</div>
-                                <div class="font-bold text-sm text-slate-800">Switches</div>
-                                <div class="text-xs text-slate-500 mt-1">Puentes (Bridges), Tarjetas NIC</div>
+                            <!-- Enlace -->
+                            <div class="device-card-box text-center p-4 rounded-xl border border-slate-200 bg-white" data-layer="enlace">
+                                <div class="text-3xl mb-1.5">🔄</div>
+                                <div class="font-extrabold text-xs text-slate-800">Switches & Bridges</div>
+                                <div class="text-[10px] text-slate-400 mt-1">Conmutadores de tramas basados en MAC Address</div>
                             </div>
 
-                            <div class="device-box text-center p-4 rounded-lg border-2 border-slate-200 bg-white" data-layer="fisica">
-                                <div class="text-3xl mb-2">🔌</div>
-                                <div class="font-bold text-sm text-slate-800">Hubs y Repetidores</div>
-                                <div class="text-xs text-slate-500 mt-1">Transceptores, Cables, Conectores</div>
+                            <!-- Física -->
+                            <div class="device-card-box text-center p-4 rounded-xl border border-slate-200 bg-white" data-layer="fisica">
+                                <div class="text-3xl mb-1.5">🔌</div>
+                                <div class="font-extrabold text-xs text-slate-800">Hubs & Repetidores</div>
+                                <div class="text-[10px] text-slate-400 mt-1">Concentradores pasivos de bits y cables cobre/fibra</div>
                             </div>
                         </div>
-                        <div class="mt-6 text-center text-sm text-slate-500 italic" id="interaction-feedback">
-                            Selecciona una capa en el panel izquierdo para ver la correspondencia.
+
+                        <div id="osi-feedback-panel" class="mt-6 p-4 rounded-xl bg-slate-100 text-xs text-slate-500 font-medium leading-relaxed italic text-center">
+                            Haz clic en cualquier capa del Modelo OSI a la izquierda para ver el hardware asociado.
                         </div>
                     </div>
 
@@ -254,14 +535,33 @@
     </main>
 
     <script>
-        const data = {
+        // DATA SET EXTRAÍDA DE LA PLANEACIÓN DIDÁCTICA
+        const syllabusData = {
             units: [
                 {
                     id: 1,
                     num: "Unidad 1",
                     title: "Introducción a Redes de Datos",
                     icon: "🚀",
-                    desc: "Conceptos fundamentales y topologías básicas que estructuran la comunicación de datos.",
+                    competencia: "Analiza las características y clasificación de las topologías de redes para seleccionar la más adecuada de acuerdo a las necesidades.",
+                    evaluacion: [
+                        { id: "exam", criterio: "Examen Digital (Teams)", ponderacion: 40 },
+                        { id: "pract", criterio: "Entrega de Prácticas (IOS)", ponderacion: 20 },
+                        { id: "activ", criterio: "Actividades de Clase", ponderacion: 15 },
+                        { id: "apuntes", criterio: "Apuntes en Formato Digital", ponderacion: 15 },
+                        { id: "asist", criterio: "Asistencia Semestral", ponderacion: 10 }
+                    ],
+                    learning: [
+                        "Identificar el origen histórico de las computadoras, su evolución y desarrollo.",
+                        "Clasificar y mapear las distribuciones de redes de acuerdo a sus áreas geográficas.",
+                        "Analizar comparativas lógicas y físicas de las topologías típicas.",
+                        "Desarrollar configuraciones iniciales de IOS en Packet Tracer."
+                    ],
+                    teaching: [
+                        "Explicar mediante diapositivas el origen, la evolución y la clasificación de redes.",
+                        "Guiar prácticas iniciales en Cisco Packet Tracer enfocadas al uso de comandos básicos de terminal.",
+                        "Administrar la evaluación diagnóstica vía Microsoft Teams."
+                    ],
                     topics: [
                         "1.1. Orígenes y evolución",
                         "1.2. Conceptos básicos de redes",
@@ -272,97 +572,235 @@
                 {
                     id: 2,
                     num: "Unidad 2",
-                    title: "Normas y estándares de redes de datos",
+                    title: "Normas y Estándares de Redes",
                     icon: "📜",
-                    desc: "Reglas internacionales que garantizan la interoperabilidad, enfocándose en OSI y TCP/IP.",
+                    competencia: "Aplica normas y estándares vigentes, que permitan un correcto diseño de una red local.",
+                    evaluacion: [
+                        { id: "exam", criterio: "Examen Digital (Teams)", ponderacion: 40 },
+                        { id: "pract", criterio: "Entrega de Prácticas (IOS)", ponderacion: 20 },
+                        { id: "activ", criterio: "Actividades de Clase", ponderacion: 20 },
+                        { id: "apuntes", criterio: "Apuntes en Formato Digital", ponderacion: 10 },
+                        { id: "asist", criterio: "Asistencia Semestral", ponderacion: 10 }
+                    ],
+                    learning: [
+                        "Investigar protocolos clave e identificar organizaciones internacionales de estándares.",
+                        "Elaborar una presentación colaborativa sobre encapsulamiento usando OSI.",
+                        "Efectuar simulaciones avanzadas sobre ruteo y conmutación interna en Packet Tracer."
+                    ],
+                    teaching: [
+                        "Exponer el Modelo de Referencia OSI de 7 capas y la suite de protocolos de TCP/IP.",
+                        "Explicar detalladamente el proceso de direccionamiento lógico vs enlace físico.",
+                        "Guiar prácticas en laboratorio remoto para verificar tránsitos de datos."
+                    ],
                     topics: [
-                        "2.1 Modelo de Comunicación OSI",
-                        "2.2 Modelo de Comunicación TCP/IP",
-                        "2.3 Estándares IEEE 802",
-                        "2.3.1 Estándares IEEE 802 para Redes Alámbricas",
-                        "2.3.2 Estándares IEEE 802 para Redes Inalámbricas",
-                        "2.4 Pilas de protocolos y flujos de datos"
+                        "2.1. Modelo de Comunicación OSI",
+                        "2.2. Modelo de Comunicación TCP/IP",
+                        "2.3. Estándares IEEE 802",
+                        "2.3.1. Estándares IEEE 802 para Redes Alámbricas",
+                        "2.3.2. Estándares IEEE 802 para Redes Inalámbricas",
+                        "2.4. Pilas de protocolos y flujos de datos"
                     ]
                 },
                 {
                     id: 3,
                     num: "Unidad 3",
-                    title: "Dispositivos de red",
+                    title: "Dispositivos de Red",
                     icon: "🛠️",
-                    desc: "Análisis del hardware encargado de transmitir, conmutar y enrutar la información.",
+                    competencia: "Selecciona y configura los dispositivos adecuados para garantizar el funcionamiento correcto de una red local.",
+                    evaluacion: [
+                        { id: "exam", criterio: "Examen Digital (Teams)", ponderacion: 40 },
+                        { id: "pract", criterio: "Entrega de Prácticas (IOS)", ponderacion: 25 },
+                        { id: "activ", criterio: "Actividades de Clase", ponderacion: 15 },
+                        { id: "apuntes", criterio: "Apuntes en Formato Digital", ponderacion: 10 },
+                        { id: "asist", criterio: "Asistencia Semestral", ponderacion: 10 }
+                    ],
+                    learning: [
+                        "Buscar, comparar y clasificar los equipos activos de infraestructura de red.",
+                        "Realizar laboratorios midiendo pérdidas de velocidad y ancho de banda según distancias físicas.",
+                        "Elaborar un diagrama que exponga el hardware que trabaja en cada capa OSI."
+                    ],
+                    teaching: [
+                        "Exponer las principales diferencias de transmisión en cobre, fibra óptica y radiofrecuencias.",
+                        "Demostrar el papel de la dirección lógicas en redes remotas versus las físicas.",
+                        "Guiar al alumno en la comparación comercial de presupuestos en hardware de red."
+                    ],
                     topics: [
-                        "3.1 Dispositivos de capa física",
-                        "3.2 Dispositivos de capa de enlace de datos",
-                        "3.3 Dispositivos de cada de red",
-                        "3.4 Dispositivos de capas superiores"
+                        "3.1. Dispositivos de capa física",
+                        "3.2. Dispositivos de capa de enlace de datos",
+                        "3.3. Dispositivos de capa de red",
+                        "3.4. Dispositivos de capas superiores"
                     ]
                 },
                 {
                     id: 4,
                     num: "Unidad 4",
-                    title: "Cableado estructurado",
+                    title: "Cableado Estructurado",
                     icon: "🏢",
-                    desc: "Diseño e instalación de la infraestructura física que soporta las telecomunicaciones.",
+                    competencia: "Analiza, diseña, y elabora un proyecto de cableado estructurado para proporcionar soluciones de conectividad, conforme a las normas y estándares vigentes.",
+                    evaluacion: [
+                        { id: "exam", criterio: "Examen Digital (Teams)", ponderacion: 40 },
+                        { id: "pract", criterio: "Entrega de Prácticas (IOS)", ponderacion: 20 },
+                        { id: "activ", criterio: "Actividades de Clase", ponderacion: 15 },
+                        { id: "apuntes", criterio: "Apuntes en Formato Digital", ponderacion: 15 },
+                        { id: "asist", criterio: "Asistencia Semestral", ponderacion: 10 }
+                    ],
+                    learning: [
+                        "Aplicar estándares ANSI/TIA/EIA-568 para armar cables UTP y STP.",
+                        "Conectar patch panels, instalar jacks rj45 y configurar racks de telecomunicación.",
+                        "Efectuar pruebas físicas con probador de cables y certificar el enlace estructurado."
+                    ],
+                    teaching: [
+                        "Explicar a detalle las normas de cableado structured STP/UTP y seguridad física en racks.",
+                        "Demostrar el uso correcto de las herramientas como pinzas ponchadoras y pelacables.",
+                        "Aplicar prácticas simuladas y físicas sobre enrutamiento físico seguro en edificios."
+                    ],
                     topics: [
-                        "4.1 Normas y estándares",
-                        "4.2 Componentes y herramientas de Instalación",
-                        "4.3 Identificación y especificaciones"
+                        "4.1. Normas y estándares",
+                        "4.2. Componentes y herramientas de Instalación",
+                        "4.3. Identificación y especificaciones"
                     ]
                 },
                 {
                     id: 5,
                     num: "Unidad 5",
-                    title: "Planificación y diseño de una red LAN",
+                    title: "Planificación y Diseño LAN",
                     icon: "📐",
-                    desc: "Fase integradora para crear una red desde cero, incluyendo direccionamiento y pruebas.",
+                    competencia: "Planifica y diseña redes de datos para la implementación de un proyecto de conectividad en las empresas, utilizando una metodología de trabajo.",
+                    evaluacion: [
+                        { id: "exam", criterio: "Evaluación del Proyecto Final", ponderacion: 40 },
+                        { id: "pract", criterio: "Entrega de Prácticas (IOS)", ponderacion: 20 },
+                        { id: "activ", criterio: "Actividades de Clase", ponderacion: 20 },
+                        { id: "apuntes", criterio: "Apuntes en Formato Digital", ponderacion: 10 },
+                        { id: "asist", criterio: "Asistencia Semestral", ponderacion: 10 }
+                    ],
+                    learning: [
+                        "Confeccionar una memoria técnica completa para el despliegue de una red LAN.",
+                        "Resolver casos de estudio reales para el diseño lógico de direccionamiento e IP Subnetting.",
+                        "Configurar servidores mock (DHCP, DNS, etc.) y asegurar escalabilidad de la red."
+                    ],
+                    teaching: [
+                        "Facilitar el formato y normas para la elaboración estructurada de una memoria técnica.",
+                        "Plantear problemáticas corporativas para análisis de necesidades tecnológicas.",
+                        "Coordinar el proyecto integrador final evaluando 4 pilares: Escalabilidad, Seguridad, Tolerancia a fallos y QoS."
+                    ],
                     topics: [
-                        "5.1 Memoria técnica",
-                        "5.2 Análisis de necesidades y requerimientos",
-                        "5.3 Diseño lógico de la red",
-                        "5.3.1 Direccionamiento IP",
-                        "5.4 Diseño físico de la red",
-                        "5.4.1 Sistema de cable estructurado",
-                        "5.4.2 Dispositivos de red",
-                        "5.4.3 Servidores y estaciones de trabajo",
-                        "5.4.4 Sistemas operativos de red y aplicaciones",
-                        "5.4.5 Pruebas y liberación"
+                        "5.1. Memoria técnica",
+                        "5.2. Análisis de necesidades y requerimientos",
+                        "5.3. Diseño lógico de la red",
+                        "5.3.1. Direccionamiento IP",
+                        "5.4. Diseño físico de la red",
+                        "5.4.1. Sistemas de cableado estructurado",
+                        "5.4.2. Dispositivos de red",
+                        "5.4.3. Servidores y estaciones de trabajo",
+                        "5.4.4. Sistemas operativos de red y aplicaciones",
+                        "5.4.5. Pruebas y liberación"
                     ]
                 }
             ]
         };
 
         const app = {
+            // Estructura de Estado de la Aplicación en memoria
+            state: {
+                completedTopics: {}, // Almacena qué temas se han marcado como completados
+                unitGrades: {
+                    1: { exam: 85, pract: 90, activ: 80, apuntes: 95, asist: 100 },
+                    2: { exam: 75, pract: 85, activ: 90, apuntes: 80, asist: 100 },
+                    3: { exam: 80, pract: 80, activ: 85, apuntes: 90, asist: 100 },
+                    4: { exam: 90, pract: 95, activ: 90, apuntes: 85, asist: 100 },
+                    5: { exam: 85, pract: 90, activ: 85, apuntes: 95, asist: 100 }
+                },
+                activeTab: "temario",
+                activeUnitId: null,
+                
+                // CLI State
+                cliHistory: [
+                    "--- Router de Prácticas ITSNCG IOS ---",
+                    "Cargando configuración de inicio... Listo.",
+                    "Presiona ENTER para comenzar o selecciona un paso en el menú izquierdo.",
+                    "Escribe 'help' o 'ayuda' si tienes dudas."
+                ],
+                cliHostname: "Router",
+                cliMode: "user", // user (>), privileged (#), config (config#), interface (config-if#)
+                cliIp: "No asignada",
+                cliMask: "No asignada",
+                cliInterfaceUp: false
+            },
+
             chartInstance: null,
 
             init() {
+                this.loadProgress();
                 this.renderUnitCards();
                 this.initChart();
+                this.updateGlobalProgressUI();
+                this.renderCliHistory();
+                this.selectUnit(1);
+                
+                // Escuchador del terminal
+                document.getElementById('cli-input-field').addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') {
+                        this.handleCliCommand();
+                    }
+                });
             },
 
             navigate(viewId) {
                 document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
                 document.getElementById('view-' + viewId).classList.add('active');
 
-                document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
-                document.getElementById('nav-' + viewId).classList.add('active');
+                document.querySelectorAll('.nav-item').forEach(el => {
+                    el.className = "flex items-center gap-3 w-full text-left px-4 py-3 rounded-lg text-slate-600 hover:bg-slate-50 transition-colors whitespace-nowrap md:whitespace-normal";
+                });
+                
+                const activeNavItem = document.getElementById('nav-' + viewId);
+                if (activeNavItem) {
+                    activeNavItem.className = "nav-item-active flex items-center gap-3 w-full text-left px-4 py-3 rounded-lg transition-colors whitespace-nowrap md:whitespace-normal";
+                }
+            },
+
+            // Cargar estado de progreso
+            loadProgress() {
+                // Instancia inicial vacía para todos los temas
+                syllabusData.units.forEach(unit => {
+                    unit.topics.forEach(topic => {
+                        this.state.completedTopics[topic] = false;
+                    });
+                });
             },
 
             renderUnitCards() {
-                const container = document.getElementById('unit-list-container');
+                const container = document.getElementById('unit-cards-container');
                 container.innerHTML = '';
 
-                data.units.forEach(unit => {
+                syllabusData.units.forEach(unit => {
+                    // Contar temas completados de esta unidad
+                    const totalTopics = unit.topics.length;
+                    const completed = unit.topics.filter(t => this.state.completedTopics[t]).length;
+                    const pct = totalTopics > 0 ? Math.round((completed / totalTopics) * 100) : 0;
+
                     const card = document.createElement('button');
-                    card.className = 'unit-card w-full text-left bg-white p-4 rounded-xl border border-slate-200 hover:border-indigo-400 focus:outline-none flex flex-col gap-2';
+                    card.className = `unit-card-btn w-full text-left bg-white p-4.5 rounded-xl border border-slate-200 hover:border-indigo-400 focus:outline-none flex flex-col gap-3 transition-all`;
                     card.id = `unit-card-${unit.id}`;
                     card.onclick = () => this.selectUnit(unit.id);
 
                     card.innerHTML = `
-                        <div class="flex items-center gap-3">
-                            <span class="text-2xl">${unit.icon}</span>
-                            <div>
-                                <span class="text-xs font-bold text-indigo-500 uppercase">${unit.num}</span>
-                                <h3 class="font-bold text-slate-800 leading-tight">${unit.title}</h3>
+                        <div class="flex items-center justify-between w-full">
+                            <div class="flex items-center gap-3">
+                                <span class="text-3xl bg-slate-50 p-2 rounded-xl shadow-inner">${unit.icon}</span>
+                                <div>
+                                    <span class="text-[10px] font-black text-indigo-600 uppercase tracking-widest">${unit.num}</span>
+                                    <h3 class="font-bold text-slate-800 leading-tight text-sm">${unit.title}</h3>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="w-full">
+                            <div class="flex justify-between items-center text-[10px] text-slate-400 font-bold mb-1">
+                                <span>Progreso Unidad</span>
+                                <span>${pct}%</span>
+                            </div>
+                            <div class="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
+                                <div class="bg-indigo-600 h-1.5 rounded-full transition-all duration-300" style="width: ${pct}%"></div>
                             </div>
                         </div>
                     `;
@@ -371,148 +809,428 @@
             },
 
             selectUnit(id) {
-                document.querySelectorAll('.unit-card').forEach(card => card.classList.remove('selected'));
-                document.getElementById(`unit-card-${id}`).classList.add('selected');
+                this.state.activeUnitId = id;
+                document.querySelectorAll('.unit-card-btn').forEach(card => card.classList.remove('selected'));
+                const selectedCard = document.getElementById(`unit-card-${id}`);
+                if (selectedCard) selectedCard.classList.add('selected');
 
-                document.getElementById('unit-detail-empty').classList.add('hidden');
-                document.getElementById('unit-detail-content').classList.remove('hidden');
+                document.getElementById('detail-empty-state').classList.add('hidden');
+                document.getElementById('detail-active-state').classList.remove('hidden');
 
-                const unit = data.units.find(u => u.id === id);
-                
-                document.getElementById('detail-icon').innerText = unit.icon;
-                document.getElementById('detail-unit-num').innerText = unit.num;
-                document.getElementById('detail-title').innerText = unit.title;
+                const unit = syllabusData.units.find(u => u.id === id);
 
-                const topicsList = document.getElementById('detail-topics');
-                topicsList.innerHTML = '';
-                
-                unit.topics.forEach(topic => {
-                    const li = document.createElement('li');
-                    li.className = 'flex items-start gap-3 p-3 rounded-lg bg-slate-50 border border-slate-100';
-                    li.innerHTML = `
-                        <div class="mt-1 w-2 h-2 rounded-full bg-teal-400 flex-shrink-0"></div>
-                        <span class="text-slate-700 leading-snug">${topic}</span>
+                document.getElementById('active-unit-icon').innerText = unit.icon;
+                document.getElementById('active-unit-label').innerText = unit.num;
+                document.getElementById('active-unit-title').innerText = unit.title;
+                document.getElementById('active-unit-competencia').innerText = unit.competencia;
+
+                this.renderTopicsChecklist(unit);
+                this.renderGradesSim(unit);
+                this.renderActivities(unit);
+                this.switchTab(this.state.activeTab);
+            },
+
+            switchTab(tabId) {
+                this.state.activeTab = tabId;
+                document.querySelectorAll('.tab-panel').forEach(p => p.classList.add('hidden'));
+                document.querySelectorAll('button[id^="tab-"]').forEach(b => {
+                    b.className = "py-3 px-4 border-b-2 border-transparent text-sm font-semibold text-slate-600 hover:text-indigo-600 transition-colors";
+                });
+
+                document.getElementById('panel-' + tabId).classList.remove('hidden');
+                document.getElementById('tab-' + tabId).className = "tab-btn-active py-3 px-4 border-b-2 border-indigo-600 text-sm font-semibold text-indigo-600 transition-colors";
+            },
+
+            renderTopicsChecklist(unit) {
+                const list = document.getElementById('active-unit-topics-list');
+                list.innerHTML = '';
+
+                unit.topics.forEach((topic, idx) => {
+                    const isChecked = this.state.completedTopics[topic];
+                    const item = document.createElement('div');
+                    item.className = `flex items-start gap-3 p-3.5 rounded-xl border transition-all ${isChecked ? 'bg-indigo-50/50 border-indigo-200' : 'bg-slate-50/50 border-slate-200'}`;
+                    item.innerHTML = `
+                        <input type="checkbox" id="topic-chk-${idx}" ${isChecked ? 'checked' : ''} 
+                            onchange="app.toggleTopic('${topic}', ${idx})" 
+                            class="mt-1 w-4 h-4 text-indigo-600 rounded focus:ring-indigo-500 border-slate-300 cursor-pointer">
+                        <label for="topic-chk-${idx}" class="text-xs font-semibold text-slate-700 leading-normal cursor-pointer select-none">
+                            ${topic}
+                        </label>
                     `;
-                    topicsList.appendChild(li);
+                    list.appendChild(item);
+                });
+            },
+
+            toggleTopic(topicName, index) {
+                const checked = document.getElementById(`topic-chk-${index}`).checked;
+                this.state.completedTopics[topicName] = checked;
+                
+                // Recalcular y actualizar interfaces
+                this.renderUnitCards();
+                this.updateGlobalProgressUI();
+                this.initChart(); // recargar distribución de Chart.js
+            },
+
+            updateGlobalProgressUI() {
+                const keys = Object.keys(this.state.completedTopics);
+                const total = keys.length;
+                const completed = keys.filter(k => this.state.completedTopics[k]).length;
+                const pct = total > 0 ? Math.round((completed / total) * 100) : 0;
+
+                document.getElementById('sidebar-progress-percent').innerText = `${pct}%`;
+                document.getElementById('sidebar-progress-bar').style.width = `${pct}%`;
+                document.getElementById('dashboard-progress-big').innerText = `${pct}%`;
+            },
+
+            renderGradesSim(unit) {
+                const container = document.getElementById('grade-sliders-container');
+                container.innerHTML = '';
+
+                const grades = this.state.unitGrades[unit.id];
+
+                unit.evaluacion.forEach(item => {
+                    const savedGrade = grades[item.id] || 0;
+                    const sliderRow = document.createElement('div');
+                    sliderRow.className = "bg-white p-3.5 rounded-lg border border-slate-200 shadow-sm space-y-1";
+                    sliderRow.innerHTML = `
+                        <div class="flex justify-between items-center text-xs font-bold text-slate-700">
+                            <span>${item.criterio} <span class="text-[10px] text-indigo-600 font-extrabold">(Peso: ${item.ponderacion}%)</span></span>
+                            <span id="label-val-${item.id}" class="text-slate-800">${savedGrade} / 100</span>
+                        </div>
+                        <input type="range" min="0" max="100" value="${savedGrade}" 
+                            oninput="app.updateSimGrade(${unit.id}, '${item.id}', this.value)"
+                            class="w-full accent-indigo-600 h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer">
+                    `;
+                    container.appendChild(sliderRow);
+                });
+
+                this.calculateSimTotal(unit.id);
+            },
+
+            updateSimGrade(unitId, itemId, val) {
+                document.getElementById(`label-val-${itemId}`).innerText = `${val} / 100`;
+                this.state.unitGrades[unitId][itemId] = parseInt(val);
+                this.calculateSimTotal(unitId);
+            },
+
+            calculateSimTotal(unitId) {
+                const unit = syllabusData.units.find(u => u.id === unitId);
+                const grades = this.state.unitGrades[unitId];
+                let total = 0;
+
+                unit.evaluacion.forEach(item => {
+                    const grade = grades[item.id] || 0;
+                    total += (grade * (item.ponderacion / 100));
+                });
+
+                total = Math.round(total);
+                const countLabel = document.getElementById('grade-calc-total');
+                const statusLabel = document.getElementById('grade-calc-status');
+
+                if (countLabel && statusLabel) {
+                    countLabel.innerText = `${total} / 100`;
+                    if (total >= 70) {
+                        statusLabel.innerText = "Aprobado";
+                        statusLabel.className = "text-[9px] text-emerald-600 font-black uppercase mt-0.5";
+                        countLabel.className = "text-2xl font-black text-emerald-600";
+                    } else {
+                        statusLabel.innerText = "Reprobado";
+                        statusLabel.className = "text-[9px] text-red-500 font-black uppercase mt-0.5";
+                        countLabel.className = "text-2xl font-black text-red-600";
+                    }
+                }
+            },
+
+            renderActivities(unit) {
+                const learnContainer = document.getElementById('active-unit-learning-activities');
+                const teachContainer = document.getElementById('active-unit-teaching-activities');
+
+                learnContainer.innerHTML = '';
+                teachContainer.innerHTML = '';
+
+                unit.learning.forEach(act => {
+                    const li = document.createElement('li');
+                    li.className = "leading-relaxed pb-1";
+                    li.innerText = act;
+                    learnContainer.appendChild(li);
+                });
+
+                unit.teaching.forEach(act => {
+                    const li = document.createElement('li');
+                    li.className = "leading-relaxed pb-1";
+                    li.innerText = act;
+                    teachContainer.appendChild(li);
                 });
             },
 
             initChart() {
-                const ctx = document.getElementById('syllabusChart').getContext('2d');
-                
-                const labels = data.units.map(u => u.num + ": " + u.title);
-                const topicCounts = data.units.map(u => u.topics.length);
+                const ctx = document.getElementById('syllabusChart');
+                if (!ctx) return;
 
-                this.chartInstance = new Chart(ctx, {
-                    type: 'doughnut',
+                // Preparar datos del avance
+                const labels = syllabusData.units.map(u => u.num);
+                const totalByUnit = syllabusData.units.map(u => u.topics.length);
+                const completedByUnit = syllabusData.units.map(u => {
+                    return u.topics.filter(t => this.state.completedTopics[t]).length;
+                });
+                const pendingByUnit = totalByUnit.map((tot, idx) => tot - completedByUnit[idx]);
+
+                if (this.chartInstance) {
+                    this.chartInstance.destroy();
+                }
+
+                this.chartInstance = new Chart(ctx.getContext('2d'), {
+                    type: 'bar',
                     data: {
                         labels: labels,
-                        datasets: [{
-                            label: 'Cantidad de Subtemas',
-                            data: topicCounts,
-                            backgroundColor: [
-                                '#818cf8', 
-                                '#34d399', 
-                                '#fbbf24', 
-                                '#f87171', 
-                                '#6366f1'  
-                            ],
-                            borderWidth: 2,
-                            borderColor: '#ffffff',
-                            hoverOffset: 10
-                        }]
+                        datasets: [
+                            {
+                                label: 'Completado',
+                                data: completedByUnit,
+                                backgroundColor: '#10b981', // emerald-500
+                                borderRadius: 6
+                            },
+                            {
+                                label: 'Pendiente',
+                                data: pendingByUnit,
+                                backgroundColor: '#cbd5e1', // slate-300
+                                borderRadius: 6
+                            }
+                        ]
                     },
                     options: {
                         responsive: true,
                         maintainAspectRatio: false,
+                        scales: {
+                            x: { stacked: true },
+                            y: { stacked: true, max: 12 }
+                        },
                         plugins: {
                             legend: {
-                                position: 'right',
+                                position: 'bottom',
                                 labels: {
-                                    font: { family: "'Inter', sans-serif", size: 12 },
-                                    color: '#475569',
-                                    generateLabels: function(chart) {
-                                        const data = chart.data;
-                                        if (data.labels.length && data.datasets.length) {
-                                            return data.labels.map(function(label, i) {
-                                                const meta = chart.getDatasetMeta(0);
-                                                const ds = data.datasets[0];
-                                                const value = ds.data[i];
-                                                let wrappedLabel = label;
-                                                if(label.length > 25) {
-                                                    wrappedLabel = label.substring(0, 22) + '...';
-                                                }
-                                                return {
-                                                    text: `${wrappedLabel} (${value} temas)`,
-                                                    fillStyle: ds.backgroundColor[i],
-                                                    hidden: isNaN(ds.data[i]) || meta.data[i].hidden,
-                                                    index: i
-                                                };
-                                            });
-                                        }
-                                        return [];
-                                    }
-                                }
-                            },
-                            tooltip: {
-                                backgroundColor: 'rgba(15, 23, 42, 0.9)',
-                                titleFont: { family: "'Inter', sans-serif", size: 13 },
-                                bodyFont: { family: "'Inter', sans-serif", size: 14, weight: 'bold' },
-                                padding: 12,
-                                cornerRadius: 8,
-                                callbacks: {
-                                    label: function(context) {
-                                        let label = context.label || '';
-                                        if (label) {
-                                            label += ': ';
-                                        }
-                                        if (context.parsed !== null) {
-                                            label += context.parsed + ' Subtemas';
-                                        }
-                                        return label;
-                                    }
+                                    font: { family: "'Inter', sans-serif", size: 10, weight: '500' }
                                 }
                             }
-                        },
-                        cutout: '65%'
+                        }
                     }
                 });
             },
 
+            // SIMULADOR CLI CISCO IOS
+            setTutorial(stepNum) {
+                const steps = {
+                    1: {
+                        cmd: "enable",
+                        desc: "Ingresa 'enable' para cambiar del Modo de Usuario al Modo Privilegiado."
+                    },
+                    2: {
+                        cmd: "configure terminal",
+                        desc: "Escribe 'configure terminal' o 'config t' para ingresar al Modo de Configuración Global."
+                    },
+                    3: {
+                        cmd: "show ip interface brief",
+                        desc: "Escribe 'show ip interface brief' o 'show ip int brief' para verificar el estado físico e IP de tus puertos."
+                    }
+                };
+
+                const selected = steps[stepNum];
+                this.state.cliHistory.push(`[TUTORIAL] Objetivo: Escribe "${selected.cmd}"`);
+                this.state.cliHistory.push(`[EXPLICACIÓN] ${selected.desc}`);
+                this.renderCliHistory();
+                
+                // Enfocar el input
+                document.getElementById('cli-input-field').focus();
+            },
+
+            handleCliCommand() {
+                const inputEl = document.getElementById('cli-input-field');
+                const rawCommand = inputEl.value.trim();
+                inputEl.value = '';
+
+                if (!rawCommand) return;
+
+                // Imprimir el prompt con el comando ingresado
+                const promptSymbol = this.getPromptSymbol();
+                this.state.cliHistory.push(`${this.state.cliHostname}${promptSymbol} ${rawCommand}`);
+
+                const cmd = rawCommand.toLowerCase();
+
+                // Proceso de comandos simulados
+                if (cmd === 'ayuda' || cmd === 'help' || cmd === '?') {
+                    this.state.cliHistory.push("Comandos utilizables en este mock:");
+                    this.state.cliHistory.push("  enable                       - Entrar a modo privilegiado");
+                    this.state.cliHistory.push("  configure terminal / config t- Entrar a modo de configuración global");
+                    this.state.cliHistory.push("  hostname [Nombre]            - Cambiar el nombre del equipo");
+                    this.state.cliHistory.push("  interface f0/0 / int f0/0     - Acceder a la interfaz FastEthernet0/0");
+                    this.state.cliHistory.push("  ip address [IP] [Máscara]    - Configurar IP (Ej: ip address 192.168.1.1 255.255.255.0)");
+                    this.state.cliHistory.push("  no shutdown                  - Habilitar puerto de la interfaz");
+                    this.state.cliHistory.push("  show ip interface brief      - Listar estado e IPs de interfaces");
+                    this.state.cliHistory.push("  exit                         - Retroceder un nivel de configuración");
+                    this.state.cliHistory.push("  clear                        - Limpiar la consola");
+                } 
+                else if (cmd === 'clear') {
+                    this.state.cliHistory = [];
+                }
+                else if (cmd === 'enable') {
+                    if (this.state.cliMode === 'user') {
+                        this.state.cliMode = 'privileged';
+                        this.state.cliHistory.push("% Cambiado exitosamente a modo privilegiado.");
+                    } else {
+                        this.state.cliHistory.push("% Dispositivo ya está en modo privilegiado.");
+                    }
+                } 
+                else if (cmd === 'configure terminal' || cmd === 'config t') {
+                    if (this.state.cliMode === 'privileged') {
+                        this.state.cliMode = 'config';
+                        this.state.cliHistory.push("Ingresa comandos de configuración, uno por línea. Termina con 'exit'.");
+                    } else if (this.state.cliMode === 'user') {
+                        this.state.cliHistory.push("% Comando rechazado. Primero ingresa al modo privilegiado escribiendo 'enable'.");
+                    } else {
+                        this.state.cliHistory.push("% Ya estás en modo de configuración.");
+                    }
+                }
+                else if (cmd.startsWith('hostname ')) {
+                    if (this.state.cliMode === 'config') {
+                        const newName = rawCommand.substring(9).trim();
+                        if (newName) {
+                            this.state.cliHostname = newName;
+                            this.state.cliHistory.push(`% Hostname modificado a: ${newName}`);
+                        } else {
+                            this.state.cliHistory.push("% Falta el argumento de nombre.");
+                        }
+                    } else {
+                        this.state.cliHistory.push("% Error: El comando hostname sólo es válido en Modo de Configuración.");
+                    }
+                }
+                else if (cmd === 'interface f0/0' || cmd === 'int f0/0') {
+                    if (this.state.cliMode === 'config') {
+                        this.state.cliMode = 'interface';
+                        this.state.cliHistory.push("% Ingresado a la configuración de interfaz FastEthernet0/0.");
+                    } else {
+                        this.state.cliHistory.push("% Error: Debe estar en Modo de Configuración Global ('configure terminal') primero.");
+                    }
+                }
+                else if (cmd.startsWith('ip address ')) {
+                    if (this.state.cliMode === 'interface') {
+                        const parts = rawCommand.split(' ');
+                        if (parts.length >= 5) {
+                            const ip = parts[2];
+                            const mask = parts[3];
+                            this.state.cliIp = ip;
+                            this.state.cliMask = mask;
+                            this.state.cliHistory.push(`% Dirección configurada: IP ${ip} con máscara ${mask}`);
+                        } else {
+                            this.state.cliHistory.push("% Formato inválido. Use: ip address [IP] [MÁSCARA]");
+                        }
+                    } else {
+                        this.state.cliHistory.push("% Error: Este comando debe ejecutarse en el submodo de interfaz.");
+                    }
+                }
+                else if (cmd === 'no shutdown') {
+                    if (this.state.cliMode === 'interface') {
+                        this.state.cliInterfaceUp = true;
+                        this.state.cliHistory.push("% Interface FastEthernet0/0, changed state to UP");
+                    } else {
+                        this.state.cliHistory.push("% Error: Debe estar en el submodo de interfaz ('interface f0/0') para encenderla.");
+                    }
+                }
+                else if (cmd === 'show ip interface brief' || cmd === 'show ip int brief') {
+                    if (this.state.cliMode === 'privileged' || this.state.cliMode === 'config' || this.state.cliMode === 'interface') {
+                        const status = this.state.cliInterfaceUp ? "up        up" : "down      down";
+                        this.state.cliHistory.push("Interface              IP-Address      OK? Method Status                Protocol");
+                        this.state.cliHistory.push(`FastEthernet0/0        ${this.state.cliIp.padEnd(16)} YES manual ${status}`);
+                    } else {
+                        this.state.cliHistory.push("% Error: Acceso denegado. Primero ejecuta el comando 'enable'.");
+                    }
+                }
+                else if (cmd === 'exit') {
+                    if (this.state.cliMode === 'interface') {
+                        this.state.cliMode = 'config';
+                    } else if (this.state.cliMode === 'config') {
+                        this.state.cliMode = 'privileged';
+                    } else if (this.state.cliMode === 'privileged') {
+                        this.state.cliMode = 'user';
+                    } else {
+                        this.state.cliHistory.push("% No puedes retroceder más.");
+                    }
+                }
+                else {
+                    this.state.cliHistory.push(`% Invalid input detected: '${rawCommand}'`);
+                }
+
+                this.renderCliHistory();
+            },
+
+            getPromptSymbol() {
+                switch(this.state.cliMode) {
+                    case 'user': return '>';
+                    case 'privileged': return '#';
+                    case 'config': return '(config)#';
+                    case 'interface': return '(config-if)#';
+                    default: return '>';
+                }
+            },
+
+            renderCliHistory() {
+                const outputContainer = document.getElementById('cli-output');
+                outputContainer.innerHTML = '';
+
+                this.state.cliHistory.forEach(line => {
+                    const lineEl = document.createElement('div');
+                    if (line.startsWith('%') || line.startsWith('Invalid')) {
+                        lineEl.className = 'text-yellow-400 font-mono';
+                    } else if (line.startsWith('[TUTORIAL]')) {
+                        lineEl.className = 'text-emerald-400 font-bold border-l-2 border-emerald-500 pl-2 my-1';
+                    } else if (line.startsWith('[EXPLICACIÓN]')) {
+                        lineEl.className = 'text-slate-400 italic pl-2';
+                    } else {
+                        lineEl.className = 'text-slate-300';
+                    }
+                    lineEl.innerText = line;
+                    outputContainer.appendChild(lineEl);
+                });
+
+                // Actualizar Prompt actual
+                document.getElementById('cli-prompt').innerText = `${this.state.cliHostname}${this.getPromptSymbol()}`;
+
+                // Auto Scroll hasta abajo
+                outputContainer.scrollTop = outputContainer.scrollHeight;
+            },
+
+            // MAPA DE DISPOSITIVOS OSI
             highlightDevices(layerName) {
-                document.querySelectorAll('.layer-btn').forEach(btn => {
+                document.querySelectorAll('.layer-pill').forEach(btn => {
                     btn.classList.remove('active-layer');
-                    btn.classList.replace('border-indigo-500', 'border-slate-200');
                 });
                 
                 const activeBtn = document.getElementById('layer-' + layerName);
-                if(activeBtn) {
+                if (activeBtn) {
                     activeBtn.classList.add('active-layer');
                 }
 
-                document.querySelectorAll('.device-box').forEach(box => {
+                document.querySelectorAll('.device-card-box').forEach(box => {
                     box.classList.remove('highlight');
                     if (box.dataset.layer === layerName) {
                         box.classList.add('highlight');
                     }
                 });
 
-                const feedback = document.getElementById('interaction-feedback');
-                const messages = {
-                    'superior': 'Firewalls, Proxies y Gateways operan en la cima del modelo, gestionando sesiones y datos de aplicaciones.',
-                    'transporte': '¡Aviso! El temario principal no detalla dispositivos exclusivos de Capa 4, pero aquí operan protocolos como TCP/UDP.',
-                    'red': 'Routers y Switches Capa 3 (L3) enrutan paquetes basándose en direcciones IP lógicas.',
-                    'enlace': 'Los Switches estándar y las tarjetas de red (NIC) conmutan tramas utilizando direcciones MAC físicas.',
-                    'fisica': 'Hubs y repetidores amplifican señales eléctricas sin entender de direcciones lógicas o físicas.'
+                const feedback = document.getElementById('osi-feedback-panel');
+                const explanations = {
+                    'superior': 'Las capas 5, 6 y 7 encapsulan datos crudos de nivel de software. Aquí actúan Firewalls de última generación, Proxies inversos y Gateways de aplicaciones para filtrar paquetes complejos.',
+                    'transporte': 'La capa de transporte regula flujos de control por software (TCP/UDP). Aunque no se mapea hardware comercial exclusivo, es vital en el direccionamiento lógico por puertos lógicos (Port Mapping).',
+                    'red': 'La capa de red gestiona el enrutamiento lógico global de paquetes con direcciones IP. Los Routers inteligentes y los Switches de Capa 3 (Multicapa) son los dispositivos dominantes aquí.',
+                    'enlace': 'La capa 2 agrupa bits en tramas y se encarga del direccionamiento físico utilizando MAC Address. Los Switches de conmutación LAN y los Bridges operan en este rango.',
+                    'fisica': 'La capa física convierte bits en señales eléctricas, ópticas o electromagnéticas. El hardware clave incluye Hubs (concentradores), repetidores de señal, cableado estructurado STP/UTP y conectores.'
                 };
                 
-                feedback.innerHTML = `<strong class="text-indigo-600">Observación:</strong> ${messages[layerName]}`;
-                feedback.classList.remove('italic', 'text-slate-500');
-                feedback.classList.add('text-slate-700');
+                feedback.innerText = explanations[layerName];
+                feedback.className = "mt-6 p-4 rounded-xl bg-indigo-50 border border-indigo-100 text-xs text-indigo-950 font-semibold leading-relaxed text-center shadow-sm";
             }
         };
 
-        window.onload = () => {
+        window.onload = function () {
             app.init();
         };
     </script>
