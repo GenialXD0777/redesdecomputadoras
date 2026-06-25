@@ -1077,7 +1077,7 @@
                     const newDatabase = {};
 
                     jsonData.forEach(row => {
-                        // Buscamos mapear columnas clave de forma flexible
+                        // Buscamos mapear columnas de forma flexible
                         const control = row['Control'] || row['No_Control'] || row['Matrícula'] || row['matricula'] || Object.values(row)[0];
                         const name = row['Nombre'] || row['Estudiante'] || row['Alumno'] || Object.values(row)[1];
 
