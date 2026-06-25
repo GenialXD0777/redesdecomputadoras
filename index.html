@@ -3,13 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Redes de Computadoras 2025 - Plataforma de Instrumentación Interactiva</title>
+    <title>Redes de Computadoras 2026 - Plataforma de Instrumentación Interactiva</title>
+    <!-- Tailwind CSS para el diseño responsivo e indestructible -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js para visualización de progreso en Dashboard -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- SheetJS (XLSX) para procesar archivos de Excel directamente en el navegador del usuario -->
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <!-- Fuentes modernas de Google -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Fira+Code:wght@400;500;700&display=swap" rel="stylesheet">
     
     <!-- Chosen Palette: Slate and Indigo Premium -->
-    <!-- Application Structure Plan: Sidebar-based Single Page Application layout designed to map syllabus progress, grading weight simulations, and terminal activities. It provides an executive dashboard, an interactive progress tracker by unit with checkboxes and grading calculators, a mock Cisco CLI console, and an OSI/hardware mapping tool. This layout is completely bulletproofed for split-screen and maximized widescreen modes using viewport flex heights and independent inner scrolling. -->
+    <!-- Application Structure Plan: Sidebar-based Single Page Application layout designed to map syllabus progress, Excel-based grading queries, and terminal activities. It provides an executive dashboard, an interactive progress tracker by unit with checkboxes and grading calculators, a mock Cisco CLI console, and an OSI/hardware mapping tool. This layout is completely bulletproofed for split-screen and maximized widescreen modes using viewport flex heights and independent inner scrolling. -->
     <!-- Visualization & Content Choices: Syllabus progress tracking -> Goal: Inform & Track -> Viz: Stacked Bar Chart (Chart.js) for unit completion status + circular progress indicators -> Interaction: Interactive checkboxes updating overall percentage and chart in real-time. Grading weight simulation -> Goal: Compare -> Viz: HTML slider calculators with progress meters -> Interaction: Real-time calculation of overall unit marks based on custom weights. Confirming NO SVG or Mermaid used. -->
     <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
 
@@ -21,6 +26,16 @@
         
         .mono-font {
             font-family: 'Fira Code', monospace;
+        }
+        
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 480px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 250px;
+            max-height: 280px;
         }
 
         .view-section {
@@ -75,14 +90,14 @@
         }
     </style>
 </head>
-<body class="text-slate-800 h-screen w-screen flex flex-col md:flex-row overflow-hidden bg-slate-50">
+<body class="text-slate-800 h-screen flex flex-col md:flex-row overflow-hidden bg-slate-50">
 
     <!-- MENÚ DE NAVEGACIÓN LATERAL (FIJO E INDEPENDIENTE) -->
-    <nav class="w-full md:w-72 bg-white border-r border-slate-200 flex flex-col shadow-sm z-10 flex-shrink-0">
+    <nav class="w-full md:w-68 bg-white border-r border-slate-200 flex flex-col shadow-sm z-10 flex-shrink-0">
         <div class="p-5 border-b border-slate-200">
             <div class="flex items-center gap-2 mb-2">
                 <span class="text-2xl">⚡</span>
-                <span class="text-xs font-bold uppercase tracking-wider text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded">Académico 2025</span>
+                <span class="text-xs font-bold uppercase tracking-wider text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded">Académico 2026</span>
             </div>
             <h1 class="font-extrabold text-lg text-slate-900 leading-tight">Redes de Computadoras</h1>
             <p class="text-xs text-slate-500 font-mono mt-0.5">Clave Oficial: SCD-1021</p>
@@ -126,19 +141,49 @@
         </div>
     </nav>
 
-    <!-- ÁREA DE CONTENIDO PRINCIPAL (HERMÉTICO CONTRA DESBORDAMIENTOS Y COLAPSOS) -->
+    <!-- ÁREA DE CONTENIDO PRINCIPAL (HERMÉTICO CONTRA DESBORDAMIENTOS) -->
     <main class="flex-grow flex flex-col min-w-0 min-h-0 overflow-hidden bg-slate-50 p-4 md:p-6 lg:p-8 relative">
 
         <!-- SECCIÓN 1: DASHBOARD DE BIENVENIDA -->
         <section id="view-dashboard" class="view-section flex-grow flex flex-col min-h-0 w-full max-w-5xl mx-auto space-y-6">
             <!-- Header Fijo -->
-            <header class="flex-shrink-0">
-                <h2 class="text-2xl md:text-3xl font-black text-slate-900 tracking-tight">Instrumentación Didáctica 2025</h2>
-                <p class="text-slate-500 text-sm mt-1">Supervisa tu avance integral del semestre, objetivos, ponderaciones de evaluación y bibliografía recomendada.</p>
+            <header class="flex-shrink-0 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div>
+                    <h2 class="text-2xl md:text-3xl font-black text-slate-900 tracking-tight">Instrumentación Didáctica 2026</h2>
+                    <p class="text-slate-500 text-sm mt-1">Supervisa tu avance integral del semestre, objetivos, ponderaciones de evaluación y bibliografía recomendada.</p>
+                </div>
+                <!-- PANEL DOCENTE: CARGAR ARCHIVO EXCEL -->
+                <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-3 flex flex-col sm:flex-row items-center gap-3 flex-shrink-0">
+                    <div class="text-left">
+                        <span class="text-[10px] font-bold text-indigo-600 uppercase tracking-widest block">Acceso Docente</span>
+                        <span class="text-xs font-semibold text-slate-600">Cargar Excel (.xlsx / .csv)</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <label class="cursor-pointer bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs px-3 py-2 rounded-lg transition-colors flex items-center gap-1.5 shadow-sm">
+                            <span>📁 Subir Excel</span>
+                            <input type="file" id="excel-file-input" accept=".xlsx, .xls, .csv" class="hidden" onchange="app.handleExcelUpload(event)">
+                        </label>
+                        <button onclick="app.downloadExcelTemplate()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs px-3 py-2 rounded-lg transition-colors flex items-center gap-1" title="Descargar plantilla de Excel para llenar calificaciones">
+                            <span>📥 Plantilla</span>
+                        </button>
+                    </div>
+                </div>
             </header>
 
             <!-- Scroll Interno del Dashboard -->
             <div class="flex-grow overflow-y-auto pr-1 space-y-6">
+                <!-- Toast de confirmación de Excel -->
+                <div id="excel-toast" class="hidden bg-emerald-50 border border-emerald-200 rounded-xl p-4 flex items-center justify-between transition-all animate-fade">
+                    <div class="flex items-center gap-3">
+                        <span class="text-2xl">✅</span>
+                        <div>
+                            <h4 class="text-xs font-extrabold text-emerald-800 uppercase tracking-wider">¡Base de datos de calificaciones cargada con éxito!</h4>
+                            <p class="text-xs text-emerald-700 font-medium">Los alumnos ya pueden buscar su número de control en la pestaña "Explorador de Unidades".</p>
+                        </div>
+                    </div>
+                    <button onclick="document.getElementById('excel-toast').classList.add('hidden')" class="text-emerald-500 hover:text-emerald-700 font-bold text-sm">✕</button>
+                </div>
+
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                     <div class="bg-white rounded-xl p-5 shadow-sm border border-slate-200 flex flex-col justify-between">
                         <span class="text-xs text-slate-400 font-bold uppercase tracking-wider">Titular de la Materia</span>
@@ -146,7 +191,7 @@
                     </div>
                     <div class="bg-white rounded-xl p-5 shadow-sm border border-slate-200 flex flex-col justify-between">
                         <span class="text-xs text-slate-400 font-bold uppercase tracking-wider">Periodo Académico</span>
-                        <span class="text-sm font-bold text-slate-800 mt-2">Agosto - Diciembre 2025</span>
+                        <span class="text-sm font-bold text-slate-800 mt-2">Agosto - Diciembre 2026</span>
                     </div>
                     <div class="bg-white rounded-xl p-5 shadow-sm border border-slate-200 flex flex-col justify-between">
                         <span class="text-xs text-slate-400 font-bold uppercase tracking-wider">Horas de Clase</span>
@@ -233,8 +278,8 @@
         <section id="view-temario" class="view-section flex-grow flex flex-col min-h-0 w-full max-w-6xl mx-auto space-y-4 hidden">
             <!-- Header Fijo -->
             <header class="flex-shrink-0">
-                <h2 class="text-2xl md:text-3xl font-black text-slate-900 tracking-tight">Explorador de Unidades y Planificación</h2>
-                <p class="text-slate-500 text-sm mt-1">Revisa las competencias específicas, calcula tus notas estimadas con la calculadora integrada y realiza el seguimiento del programa.</p>
+                <h2 class="text-2xl md:text-3xl font-black text-slate-900 tracking-tight">Explorador de Unidades y Consulta de Calificaciones</h2>
+                <p class="text-slate-500 text-sm mt-1">Revisa las competencias específicas, consulta tus calificaciones personales por medio de tu número de control y haz el seguimiento del programa.</p>
             </header>
 
             <!-- Grid Flexible con scroll independiente -->
@@ -249,7 +294,7 @@
                     <div id="detail-empty-state" class="p-12 flex flex-col items-center justify-center h-full text-slate-400 text-center">
                         <span class="text-6xl mb-4">👈</span>
                         <h4 class="text-lg font-bold">Selecciona una unidad temática</h4>
-                        <p class="text-sm mt-1 max-w-xs">Haz clic en cualquiera de las 5 unidades para analizar sus temas, competencias, actividades sugeridas y ponderación de evaluación.</p>
+                        <p class="text-sm mt-1 max-w-xs">Haz clic en cualquiera de las 5 unidades para analizar sus temas, competencias, actividades sugeridas y calificaciones.</p>
                     </div>
 
                     <div id="detail-active-state" class="hidden flex flex-col h-full overflow-hidden">
@@ -270,7 +315,7 @@
                                 Temas & Progreso
                             </button>
                             <button onclick="app.switchTab('evaluacion')" id="tab-evaluacion" class="py-3 px-4 border-b-2 border-transparent text-sm font-semibold text-slate-600 hover:text-indigo-600 transition-colors whitespace-nowrap">
-                                Evaluación e Instrumentación
+                                Consulta de Calificación
                             </button>
                             <button onclick="app.switchTab('actividades')" id="tab-actividades" class="py-3 px-4 border-b-2 border-transparent text-sm font-semibold text-slate-600 hover:text-indigo-600 transition-colors whitespace-nowrap">
                                 Actividades de Clase
@@ -281,7 +326,7 @@
                         <div class="p-6 overflow-y-auto flex-grow space-y-6">
                             <!-- TAB: Temas & Progreso -->
                             <div id="panel-temario" class="tab-panel space-y-4">
-                                <div class="bg-indigo-50 border-l-4 border-indigo-600 p-4 rounded-r-xl animate-fade">
+                                <div class="bg-indigo-50 border-l-4 border-indigo-600 p-4 rounded-r-xl">
                                     <h5 class="text-xs font-bold text-indigo-700 uppercase tracking-wide">Competencia Específica</h5>
                                     <p id="active-unit-competencia" class="text-xs font-semibold text-slate-700 mt-1 leading-relaxed">
                                         Analiza las características y clasificación de las topologías de redes para seleccionar la más adecuada de acuerdo a las necesidades.
@@ -294,27 +339,59 @@
                                 </div>
                             </div>
 
-                            <!-- TAB: Evaluación e Instrumentación -->
+                            <!-- TAB: Consulta de Calificación -->
                             <div id="panel-evaluacion" class="tab-panel hidden space-y-6">
-                                <div class="flex items-center justify-between">
-                                    <h5 class="text-xs font-bold text-slate-400 uppercase tracking-wider">Criterios de Evaluación y Calificación</h5>
-                                    <span class="text-xs text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-full font-bold">Total: 100%</span>
+                                <div class="bg-slate-50 border border-slate-200 rounded-xl p-5">
+                                    <h5 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Consulta de Calificaciones Personales</h5>
+                                    <p class="text-xs text-slate-500 mb-4">Ingresa tu número de control oficial para validar tus notas.</p>
+                                    
+                                    <div class="flex gap-2">
+                                        <input type="text" id="student-search-control" placeholder="Ej: 22100001" class="flex-grow bg-white border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                                        <button onclick="app.queryGrades()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs px-4 py-2 rounded-lg transition-colors shadow-sm">
+                                            Consultar
+                                        </button>
+                                    </div>
+                                    <p class="text-[10px] text-slate-400 mt-1.5 italic">Prueba con los números de control preinstalados: 22100001, 22100002 o 22100003.</p>
                                 </div>
 
-                                <div class="bg-slate-50 border border-slate-200 rounded-xl p-5">
-                                    <div class="flex justify-between items-center mb-3 border-b border-slate-200 pb-2">
+                                <!-- Contenedor de Resultado de Calificación -->
+                                <div id="grade-result-container" class="hidden space-y-4">
+                                    <div class="bg-white border border-slate-200 rounded-xl p-4 flex items-center justify-between shadow-sm">
                                         <div>
-                                            <h6 class="text-xs font-bold text-slate-800">Simulador de Calificación Estimada</h6>
-                                            <p class="text-[10px] text-slate-500">Mueve los controles para predecir tu nota de la unidad.</p>
+                                            <span class="text-[10px] font-bold text-indigo-600 uppercase tracking-widest block">Estudiante</span>
+                                            <h4 id="result-student-name" class="text-base font-extrabold text-slate-800">Juan Pérez Gómez</h4>
+                                            <span id="result-student-control" class="text-xs text-slate-500 font-mono">Control: 22100001</span>
                                         </div>
                                         <div class="text-right">
-                                            <span id="grade-calc-total" class="text-2xl font-black text-indigo-600">0 / 100</span>
-                                            <p id="grade-calc-status" class="text-[9px] text-red-500 font-bold uppercase mt-0.5">Reprobado</p>
+                                            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest block">Nota Obtenida</span>
+                                            <span id="result-unit-total" class="text-3xl font-black text-indigo-600">95 / 100</span>
+                                            <span id="result-unit-badge" class="block text-[10px] font-extrabold uppercase mt-1">Aprobado</span>
                                         </div>
                                     </div>
 
-                                    <div id="grade-sliders-container" class="space-y-3.5">
+                                    <!-- Tabla de Desglose de Criterios -->
+                                    <div class="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
+                                        <div class="bg-slate-50 px-4 py-2 border-b border-slate-200">
+                                            <h5 class="text-xs font-bold text-slate-600 uppercase">Detalle de Ponderaciones</h5>
+                                        </div>
+                                        <div class="divide-y divide-slate-150" id="result-grade-breakdown">
+                                            <!-- Dinámico -->
+                                        </div>
                                     </div>
+
+                                    <!-- Resumen Semestral Global del Alumno -->
+                                    <div class="bg-slate-50 border border-slate-200 rounded-xl p-4">
+                                        <h5 class="text-xs font-bold text-slate-600 uppercase tracking-wider mb-2">Estatus Global del Semestre (Agosto - Diciembre 2026)</h5>
+                                        <div class="grid grid-cols-5 gap-2 text-center" id="result-global-summary">
+                                            <!-- Dinámico (Unidades 1 a 5 con estatus) -->
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div id="grade-not-found-container" class="hidden p-6 bg-red-50 border border-red-200 rounded-xl text-center text-red-700">
+                                    <span class="text-2xl block mb-2">⚠️</span>
+                                    <h4 class="text-sm font-bold">Número de control no localizado</h4>
+                                    <p class="text-xs mt-1">Por favor, verifica el número de control o solicita al profesor actualizar la base de datos de Excel.</p>
                                 </div>
                             </div>
 
@@ -347,7 +424,7 @@
         </section>
 
         <!-- SECCIÓN 3: INTERACTIVE IOS TERMINAL -->
-        <section id="view-cli" class="view-section flex-grow flex flex-col min-h-0 w-full max-w-5xl mx-auto space-y-6 hidden">
+        <section id="view-cli" class="view-section flex-grow flex-1 h-full flex flex-col min-h-0 w-full max-w-5xl mx-auto space-y-6 hidden">
             <!-- Header Fijo -->
             <header class="flex-shrink-0">
                 <h2 class="text-2xl md:text-3xl font-black text-slate-900 tracking-tight">Simulador IOS de Dispositivos (Cisco Mock)</h2>
@@ -355,7 +432,7 @@
             </header>
 
             <!-- Layout adaptable a pantalla de escritorio / móvil -->
-            <div class="flex-grow flex flex-col lg:flex-row gap-6 min-h-0 overflow-y-auto lg:overflow-hidden">
+            <div class="flex-1 flex flex-col lg:flex-row gap-6 min-h-0 overflow-y-auto lg:overflow-hidden">
                 <!-- Panel Tutoriales (Fijo en escritorio con scroll independiente) -->
                 <div class="w-full lg:w-1/3 bg-white rounded-xl shadow-sm border border-slate-200 p-5 flex flex-col justify-between flex-shrink-0 lg:flex-shrink lg:overflow-y-auto">
                     <div>
@@ -418,7 +495,7 @@
         </section>
 
         <!-- SECCIÓN 4: CONEXIONES CLAVE (OSI & HARDWARE MATRIX) -->
-        <section id="view-interactivo" class="view-section flex-grow flex flex-col min-h-0 w-full max-w-5xl mx-auto space-y-6 hidden">
+        <section id="view-interactivo" class="view-section flex-grow flex-1 h-full flex flex-col min-h-0 w-full max-w-5xl mx-auto space-y-6 hidden">
             <!-- Header Fijo -->
             <header class="flex-shrink-0">
                 <h2 class="text-2xl md:text-3xl font-black text-slate-900 tracking-tight">Conexiones Clave: OSI y Dispositivos de Red</h2>
@@ -662,15 +739,43 @@
         const app = {
             state: {
                 completedTopics: {},
-                unitGrades: {
-                    1: { exam: 85, pract: 90, activ: 80, apuntes: 95, asist: 100 },
-                    2: { exam: 75, pract: 85, activ: 90, apuntes: 80, asist: 100 },
-                    3: { exam: 80, pract: 80, activ: 85, apuntes: 90, asist: 100 },
-                    4: { exam: 90, pract: 95, activ: 90, apuntes: 85, asist: 100 },
-                    5: { exam: 85, pract: 90, activ: 85, apuntes: 95, asist: 100 }
-                },
                 activeTab: "temario",
                 activeUnitId: null,
+                
+                // MOCK DATABASE DE ALUMNOS (PERIODO 2026)
+                // Se utiliza de forma nativa para que la vista previa no esté vacía por defecto
+                studentsDatabase: {
+                    "22100001": {
+                        nombre: "Ana Sofía Guerrero Ruiz",
+                        grades: {
+                            1: { exam: 95, pract: 100, activ: 95, apuntes: 90, asist: 100 },
+                            2: { exam: 90, pract: 85, activ: 100, apuntes: 95, asist: 100 },
+                            3: { exam: 85, pract: 95, activ: 90, apuntes: 100, asist: 100 },
+                            4: { exam: 100, pract: 90, activ: 95, apuntes: 90, asist: 100 },
+                            5: { exam: 95, pract: 100, activ: 95, apuntes: 100, asist: 100 }
+                        }
+                    },
+                    "22100002": {
+                        nombre: "Carlos Eduardo Mendoza Soto",
+                        grades: {
+                            1: { exam: 72, pract: 80, activ: 75, apuntes: 85, asist: 100 },
+                            2: { exam: 80, pract: 75, activ: 80, apuntes: 90, asist: 90 },
+                            3: { exam: 68, pract: 85, activ: 70, apuntes: 80, asist: 100 },
+                            4: { exam: 75, pract: 80, activ: 75, apuntes: 85, asist: 90 },
+                            5: { exam: 82, pract: 85, activ: 80, apuntes: 90, asist: 100 }
+                        }
+                    },
+                    "22100003": {
+                        nombre: "Iván Neftalí Molina Cruz",
+                        grades: {
+                            1: { exam: 55, pract: 60, activ: 65, apuntes: 70, asist: 80 },
+                            2: { exam: 60, pract: 50, activ: 70, apuntes: 60, asist: 100 },
+                            3: { exam: 50, pract: 70, activ: 60, apuntes: 65, asist: 80 },
+                            4: { exam: 65, pract: 60, activ: 65, apuntes: 70, asist: 90 },
+                            5: { exam: 60, pract: 75, activ: 70, apuntes: 70, asist: 100 }
+                        }
+                    }
+                },
                 
                 cliHistory: [
                     "--- Router de Prácticas ITSNCG IOS ---",
@@ -703,18 +808,18 @@
             },
 
             navigate(viewId) {
-                // Ocultar todas las secciones usando hidden (evita conflictos de display: block/flex en maximized)
+                // Forzar el ocultado de las secciones inactivas
                 document.querySelectorAll('.view-section').forEach(el => {
                     el.classList.add('hidden');
                 });
                 
-                // Mostrar la sección seleccionada de manera controlada y sin colapsar el layout
+                // Mostrar la sección activa
                 const activeSection = document.getElementById('view-' + viewId);
                 if (activeSection) {
                     activeSection.classList.remove('hidden');
                 }
 
-                // Ajustar visual de los botones laterales
+                // Cambiar estado visual de botones de navegación lateral
                 document.querySelectorAll('.nav-btn').forEach(el => {
                     el.className = "nav-btn text-slate-600 hover:bg-slate-50 flex items-center gap-3 w-full text-left px-4 py-3 rounded-lg transition-colors whitespace-nowrap md:whitespace-normal";
                 });
@@ -724,7 +829,7 @@
                     activeNav.className = "nav-btn bg-indigo-50 text-indigo-600 font-semibold border-r-4 border-indigo-600 flex items-center gap-3 w-full text-left px-4 py-3 rounded-lg transition-colors whitespace-nowrap md:whitespace-normal";
                 }
                 
-                // Redibujar gráfico para evitar bug de deformación en maximized
+                // Forzar reconstrucción de gráficos en Dashboard
                 if (viewId === 'dashboard') {
                     this.initChart();
                 }
@@ -793,9 +898,14 @@
                 document.getElementById('active-unit-competencia').innerText = unit.competencia;
 
                 this.renderTopicsChecklist(unit);
-                this.renderGradesSim(unit);
                 this.renderActivities(unit);
                 this.switchTab(this.state.activeTab);
+
+                // Si hay una consulta previa activa, actualizar los datos para la nueva unidad seleccionada
+                const searchVal = document.getElementById('student-search-control').value.trim();
+                if (searchVal && this.state.studentsDatabase[searchVal]) {
+                    this.displayGrades(searchVal);
+                }
             },
 
             switchTab(tabId) {
@@ -849,63 +959,209 @@
                 document.getElementById('dashboard-progress-big').innerText = `${pct}%`;
             },
 
-            renderGradesSim(unit) {
-                const container = document.getElementById('grade-sliders-container');
-                container.innerHTML = '';
+            queryGrades() {
+                const inputEl = document.getElementById('student-search-control');
+                const controlNum = inputEl.value.trim();
 
-                const grades = this.state.unitGrades[unit.id];
+                const resultsDiv = document.getElementById('grade-result-container');
+                const errorDiv = document.getElementById('grade-not-found-container');
 
-                unit.evaluacion.forEach(item => {
-                    const savedGrade = grades[item.id] || 0;
-                    const sliderRow = document.createElement('div');
-                    sliderRow.className = "bg-white p-3.5 rounded-lg border border-slate-200 shadow-sm space-y-1";
-                    sliderRow.innerHTML = `
-                        <div class="flex justify-between items-center text-xs font-bold text-slate-700">
-                            <span>${item.criterio} <span class="text-[10px] text-indigo-600 font-extrabold">(Peso: ${item.ponderacion}%)</span></span>
-                            <span id="label-val-${item.id}" class="text-slate-800">${savedGrade} / 100</span>
-                        </div>
-                        <input type="range" min="0" max="100" value="${savedGrade}" 
-                            oninput="app.updateSimGrade(${unit.id}, '${item.id}', this.value)"
-                            class="w-full accent-indigo-600 h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer">
-                    `;
-                    container.appendChild(sliderRow);
-                });
+                if (!controlNum) {
+                    resultsDiv.classList.add('hidden');
+                    errorDiv.classList.add('hidden');
+                    return;
+                }
 
-                this.calculateSimTotal(unit.id);
+                if (this.state.studentsDatabase[controlNum]) {
+                    errorDiv.classList.add('hidden');
+                    resultsDiv.classList.remove('hidden');
+                    this.displayGrades(controlNum);
+                } else {
+                    resultsDiv.classList.add('hidden');
+                    errorDiv.classList.remove('hidden');
+                }
             },
 
-            updateSimGrade(unitId, itemId, val) {
-                document.getElementById(`label-val-${itemId}`).innerText = `${val} / 100`;
-                this.state.unitGrades[unitId][itemId] = parseInt(val);
-                this.calculateSimTotal(unitId);
-            },
+            displayGrades(controlNum) {
+                const student = this.state.studentsDatabase[controlNum];
+                const activeUnitId = this.state.activeUnitId;
+                const unit = syllabusData.units.find(u => u.id === activeUnitId);
+                const studentUnitGrades = student.grades[activeUnitId];
 
-            calculateSimTotal(unitId) {
-                const unit = syllabusData.units.find(u => u.id === unitId);
-                const grades = this.state.unitGrades[unitId];
+                // Render de metadatos básicos
+                document.getElementById('result-student-name').innerText = student.nombre;
+                document.getElementById('result-student-control').innerText = `Control: ${controlNum}`;
+
+                // Calcular total para la unidad activa
                 let total = 0;
+                const breakdownContainer = document.getElementById('result-grade-breakdown');
+                breakdownContainer.innerHTML = '';
 
-                unit.evaluacion.forEach(item => {
-                    const grade = grades[item.id] || 0;
-                    total += (grade * (item.ponderacion / 100));
+                unit.evaluacion.forEach(criteria => {
+                    const score = studentUnitGrades[criteria.id] || 0;
+                    const weighted = score * (criteria.ponderacion / 100);
+                    total += weighted;
+
+                    // Agregar línea de desglose
+                    const row = document.createElement('div');
+                    row.className = "p-3 px-4 flex items-center justify-between text-xs";
+                    row.innerHTML = `
+                        <div class="font-medium text-slate-700">
+                            ${criteria.criterio} <span class="text-slate-400">(${criteria.ponderacion}%)</span>
+                        </div>
+                        <div class="font-mono font-bold text-slate-800">
+                            ${score} / 100 <span class="text-indigo-600 ml-2">(${weighted.toFixed(1)} pts)</span>
+                        </div>
+                    `;
+                    breakdownContainer.appendChild(row);
                 });
 
                 total = Math.round(total);
-                const countLabel = document.getElementById('grade-calc-total');
-                const statusLabel = document.getElementById('grade-calc-status');
+                const totalEl = document.getElementById('result-unit-total');
+                const badgeEl = document.getElementById('result-unit-badge');
 
-                if (countLabel && statusLabel) {
-                    countLabel.innerText = `${total} / 100`;
-                    if (total >= 70) {
-                        statusLabel.innerText = "Aprobado";
-                        statusLabel.className = "text-[9px] text-emerald-600 font-black uppercase mt-0.5";
-                        countLabel.className = "text-2xl font-black text-emerald-600";
-                    } else {
-                        statusLabel.innerText = "Reprobado";
-                        statusLabel.className = "text-[9px] text-red-500 font-black uppercase mt-0.5";
-                        countLabel.className = "text-2xl font-black text-red-600";
-                    }
+                totalEl.innerText = `${total} / 100`;
+
+                if (total >= 70) {
+                    badgeEl.innerText = "Aprobado";
+                    badgeEl.className = "block text-[10px] font-extrabold uppercase mt-1 px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 inline-block";
+                    totalEl.className = "text-3xl font-black text-emerald-600";
+                } else {
+                    badgeEl.innerText = "No Aprobado";
+                    badgeEl.className = "block text-[10px] font-extrabold uppercase mt-1 px-2 py-0.5 rounded bg-red-100 text-red-800 inline-block";
+                    totalEl.className = "text-3xl font-black text-red-600";
                 }
+
+                // Generar resumen semestral general (todas las unidades)
+                const summaryContainer = document.getElementById('result-global-summary');
+                summaryContainer.innerHTML = '';
+
+                syllabusData.units.forEach(u => {
+                    let unitTotal = 0;
+                    u.evaluacion.forEach(crit => {
+                        const score = student.grades[u.id][crit.id] || 0;
+                        unitTotal += score * (crit.ponderacion / 100);
+                    });
+                    unitTotal = Math.round(unitTotal);
+                    const isPassed = unitTotal >= 70;
+
+                    const summaryCard = document.createElement('div');
+                    summaryCard.className = `p-2 rounded-lg border text-center ${isPassed ? 'border-emerald-200 bg-emerald-50/50' : 'border-red-200 bg-red-50/50'}`;
+                    summaryCard.innerHTML = `
+                        <span class="text-[9px] font-bold text-slate-400 block uppercase">U${u.id}</span>
+                        <span class="text-xs font-black block ${isPassed ? 'text-emerald-700' : 'text-red-700'}">${unitTotal}</span>
+                    `;
+                    summaryContainer.appendChild(summaryCard);
+                });
+            },
+
+            handleExcelUpload(event) {
+                const file = event.target.files[0];
+                if (!file) return;
+
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, { type: 'array' });
+                    
+                    // Tomamos la primera hoja del libro de Excel
+                    const firstSheetName = workbook.SheetNames[0];
+                    const worksheet = workbook.Sheets[firstSheetName];
+                    
+                    // Convertimos a JSON plano
+                    const jsonData = XLSX.utils.sheet_to_json(worksheet);
+
+                    if (jsonData.length === 0) return;
+
+                    // Limpiar base de datos para cargar la del profesor
+                    const newDatabase = {};
+
+                    jsonData.forEach(row => {
+                        // Buscamos mapear columnas clave de forma flexible
+                        const control = row['Control'] || row['No_Control'] || row['Matrícula'] || row['matricula'] || Object.values(row)[0];
+                        const name = row['Nombre'] || row['Estudiante'] || row['Alumno'] || Object.values(row)[1];
+
+                        if (!control) return;
+
+                        newDatabase[control] = {
+                            nombre: name || "Estudiante sin registrar",
+                            grades: {
+                                1: {
+                                    exam: parseInt(row['U1_Examen']) || 0,
+                                    pract: parseInt(row['U1_Practicas']) || parseInt(row['U1_Prácticas']) || 0,
+                                    activ: parseInt(row['U1_Actividades']) || 0,
+                                    apuntes: parseInt(row['U1_Apuntes']) || 0,
+                                    asist: parseInt(row['U1_Asistencia']) || 0
+                                },
+                                2: {
+                                    exam: parseInt(row['U2_Examen']) || 0,
+                                    pract: parseInt(row['U2_Practicas']) || parseInt(row['U2_Prácticas']) || 0,
+                                    activ: parseInt(row['U2_Actividades']) || 0,
+                                    apuntes: parseInt(row['U2_Apuntes']) || 0,
+                                    asist: parseInt(row['U2_Asistencia']) || 0
+                                },
+                                3: {
+                                    exam: parseInt(row['U3_Examen']) || 0,
+                                    pract: parseInt(row['U3_Practicas']) || parseInt(row['U3_Prácticas']) || 0,
+                                    activ: parseInt(row['U3_Actividades']) || 0,
+                                    apuntes: parseInt(row['U3_Apuntes']) || 0,
+                                    asist: parseInt(row['U3_Asistencia']) || 0
+                                },
+                                4: {
+                                    exam: parseInt(row['U4_Examen']) || 0,
+                                    pract: parseInt(row['U4_Practicas']) || parseInt(row['U4_Prácticas']) || 0,
+                                    activ: parseInt(row['U4_Actividades']) || 0,
+                                    apuntes: parseInt(row['U4_Apuntes']) || 0,
+                                    asist: parseInt(row['U4_Asistencia']) || 0
+                                },
+                                5: {
+                                    exam: parseInt(row['U5_Proyecto']) || parseInt(row['U5_Examen']) || 0,
+                                    pract: parseInt(row['U5_Practicas']) || parseInt(row['U5_Prácticas']) || 0,
+                                    activ: parseInt(row['U5_Actividades']) || 0,
+                                    apuntes: parseInt(row['U5_Apuntes']) || 0,
+                                    asist: parseInt(row['U5_Asistencia']) || 0
+                                }
+                            }
+                        };
+                    });
+
+                    // Actualizar estado de la app
+                    app.state.studentsDatabase = newDatabase;
+
+                    // Mostrar notificación exitosa
+                    const toast = document.getElementById('excel-toast');
+                    toast.classList.remove('hidden');
+                    
+                    // Limpiar el valor del input para futuras cargas
+                    event.target.value = '';
+
+                    // Si hay una consulta de búsqueda previa, refrescarla
+                    app.queryGrades();
+                };
+                reader.readAsArrayBuffer(file);
+            },
+
+            downloadExcelTemplate() {
+                // Generar un CSV robusto compatible con Microsoft Excel en español usando codificación con BOM
+                const csvRows = [
+                    "Control,Nombre,U1_Examen,U1_Practicas,U1_Actividades,U1_Apuntes,U1_Asistencia,U2_Examen,U2_Practicas,U2_Actividades,U2_Apuntes,U2_Asistencia,U3_Examen,U3_Practicas,U3_Actividades,U3_Apuntes,U3_Asistencia,U4_Examen,U4_Practicas,U4_Actividades,U4_Apuntes,U4_Asistencia,U5_Proyecto,U5_Practicas,U5_Actividades,U5_Apuntes,U5_Asistencia",
+                    "22100001,Ana Sofia Guerrero Ruiz,95,100,95,90,100,90,85,100,95,100,85,95,90,100,100,100,90,95,90,100,95,100,95,100,100",
+                    "22100002,Carlos Eduardo Mendoza Soto,72,80,75,85,100,80,75,80,90,90,68,85,70,80,100,75,80,75,85,90,82,85,80,90,100",
+                    "22100003,Ivan Neftali Molina Cruz,55,60,65,70,80,60,50,70,60,100,50,70,60,65,80,65,60,65,70,90,60,75,70,70,100"
+                ];
+
+                const csvString = csvRows.join("\n");
+                
+                // BOM para garantizar compatibilidad con caracteres en español de Excel
+                const blob = new Blob(["\uFEFF" + csvString], { type: 'text/csv;charset=utf-8;' });
+                const url = URL.createObjectURL(blob);
+                
+                const link = document.createElement("a");
+                link.setAttribute("href", url);
+                link.setAttribute("download", "Plantilla_Calificaciones_Redes_2026.csv");
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
             },
 
             renderActivities(unit) {
@@ -953,13 +1209,13 @@
                             {
                                 label: 'Completado',
                                 data: completedByUnit,
-                                backgroundColor: '#4f46e5', // Indigo-600
+                                backgroundColor: '#10b981',
                                 borderRadius: 6
                             },
                             {
                                 label: 'Pendiente',
                                 data: pendingByUnit,
-                                backgroundColor: '#cbd5e1', // Slate-300
+                                backgroundColor: '#cbd5e1',
                                 borderRadius: 6
                             }
                         ]
