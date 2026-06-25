@@ -2,26 +2,22 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Redes de Computadoras 2026 - Plataforma de Instrumentación Interactiva</title>
-    <!-- Tailwind CSS para el diseño responsivo e indestructible -->
+    <!-- Tailwind CSS para el diseño responsivo -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Chart.js para visualización de progreso en Dashboard -->
+    <!-- Chart.js para visualización de progreso -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- SheetJS (XLSX) para procesar archivos de Excel directamente en el navegador del usuario -->
+    <!-- SheetJS (XLSX) para procesar archivos de Excel directamente en el dispositivo móvil -->
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <!-- Fuentes modernas de Google -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Fira+Code:wght@400;500;700&display=swap" rel="stylesheet">
-    
-    <!-- Chosen Palette: Slate and Indigo Premium -->
-    <!-- Application Structure Plan: Sidebar-based Single Page Application layout designed to map syllabus progress, Excel-based grading queries, and terminal activities. It provides an executive dashboard, an interactive progress tracker by unit with checkboxes and grading calculators, a mock Cisco CLI console, and an OSI/hardware mapping tool. This layout is completely bulletproofed for split-screen and maximized widescreen modes using viewport flex heights and independent inner scrolling. -->
-    <!-- Visualization & Content Choices: Syllabus progress tracking -> Goal: Inform & Track -> Viz: Stacked Bar Chart (Chart.js) for unit completion status + circular progress indicators -> Interaction: Interactive checkboxes updating overall percentage and chart in real-time. Grading weight simulation -> Goal: Compare -> Viz: HTML slider calculators with progress meters -> Interaction: Real-time calculation of overall unit marks based on custom weights. Confirming NO SVG or Mermaid used. -->
-    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
 
     <style>
         body {
             font-family: 'Inter', sans-serif;
             background-color: #f8fafc;
+            -webkit-tap-highlight-color: transparent; /* Evita destello azul en Android */
         }
         
         .mono-font {
@@ -31,19 +27,16 @@
         .chart-container {
             position: relative;
             width: 100%;
-            max-width: 480px;
-            margin-left: auto;
-            margin-right: auto;
-            height: 250px;
-            max-height: 280px;
+            height: 220px;
+            max-height: 240px;
         }
 
         .view-section {
-            animation: fadeIn 0.35s ease-out;
+            animation: fadeIn 0.3s ease-out;
         }
 
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(8px); }
+            from { opacity: 0; transform: translateY(6px); }
             to { opacity: 1; transform: translateY(0); }
         }
 
@@ -73,346 +66,333 @@
             box-shadow: 0 10px 20px -5px rgba(16, 185, 129, 0.2);
         }
 
-        /* Estilo de barras de scroll premium */
-        ::-webkit-scrollbar {
-            width: 6px;
-            height: 6px;
+        /* Desplazamiento inercial premium en Android */
+        .smooth-scroll {
+            -webkit-overflow-scrolling: touch;
+            scroll-behavior: smooth;
         }
-        ::-webkit-scrollbar-track {
-            background: #f1f5f9;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #cbd5e1;
-            border-radius: 4px;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background: #94a3b8;
+
+        /* Evitar colapsos causados por el teclado en Android */
+        @media (max-height: 500px) {
+            .hide-on-keyboard {
+                display: none !important;
+            }
         }
     </style>
 </head>
-<body class="text-slate-800 h-screen flex flex-col md:flex-row overflow-hidden bg-slate-50">
+<body class="text-slate-800 min-h-screen flex flex-col md:flex-row bg-slate-50 overflow-x-hidden">
 
-    <!-- MENÚ DE NAVEGACIÓN LATERAL (FIJO E INDEPENDIENTE CON ANCHO CORREGIDO A 72) -->
-    <nav class="w-full md:w-72 bg-white border-r border-slate-200 flex flex-col shadow-sm z-10 flex-shrink-0">
-        <div class="p-5 border-b border-slate-200">
-            <div class="flex items-center gap-2 mb-2">
-                <span class="text-2xl">⚡</span>
-                <span class="text-xs font-bold uppercase tracking-wider text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded">Académico 2026</span>
+    <!-- BARRA LATERAL / CABECERA DE NAVEGACIÓN -->
+    <nav class="w-full md:w-72 bg-white border-b md:border-b-0 md:border-r border-slate-200 flex flex-col shadow-sm z-10 flex-shrink-0">
+        <!-- Logo e Información Fija -->
+        <div class="p-4 md:p-5 border-b border-slate-200 flex flex-row md:flex-col justify-between items-center md:items-start gap-2">
+            <div>
+                <div class="flex items-center gap-2 mb-1">
+                    <span class="text-xl">⚡</span>
+                    <span class="text-[10px] font-bold uppercase tracking-wider text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded">Académico 2026</span>
+                </div>
+                <h1 class="font-extrabold text-base md:text-lg text-slate-900 leading-tight">Redes de Computadoras</h1>
+                <p class="text-[10px] text-slate-500 font-mono mt-0.5">Clave Oficial: SCD-1021</p>
             </div>
-            <h1 class="font-extrabold text-lg text-slate-900 leading-tight">Redes de Computadoras</h1>
-            <p class="text-xs text-slate-500 font-mono mt-0.5">Clave Oficial: SCD-1021</p>
+            <div class="md:hidden flex items-center">
+                <span id="sidebar-progress-percent-badge" class="bg-indigo-600 text-white font-bold text-xs px-2.5 py-1 rounded-full">0% Progreso</span>
+            </div>
         </div>
 
-        <!-- Barra de Progreso Lateral -->
-        <div class="p-5 bg-slate-50 border-b border-slate-200 flex-shrink-0">
+        <!-- Barra de Progreso General (Oculta en vistas móviles horizontales estrechas) -->
+        <div class="hidden md:block p-5 bg-slate-50 border-b border-slate-200 flex-shrink-0">
             <div class="flex justify-between items-center mb-1.5 text-xs font-bold text-slate-600 uppercase">
                 <span>Progreso del Curso</span>
                 <span id="sidebar-progress-percent">0%</span>
             </div>
-            <div class="w-full bg-slate-200 rounded-full h-2.5 overflow-hidden">
-                <div id="sidebar-progress-bar" class="bg-indigo-600 h-2.5 rounded-full transition-all duration-500" style="width: 0%"></div>
+            <div class="w-full bg-slate-200 rounded-full h-2 overflow-hidden">
+                <div id="sidebar-progress-bar" class="bg-indigo-600 h-2 rounded-full transition-all duration-500" style="width: 0%"></div>
             </div>
-            <p class="text-[10px] text-slate-400 mt-1 text-center font-medium">Marcado interactivo en el temario</p>
+            <p class="text-[9px] text-slate-400 mt-1 text-center font-medium">Marcado interactivo en el temario</p>
         </div>
 
-        <!-- Botones de la Barra Lateral -->
-        <div class="flex flex-row md:flex-col overflow-x-auto md:overflow-visible p-3 gap-1 flex-grow">
-            <button onclick="app.navigate('dashboard')" id="nav-dashboard" class="nav-btn bg-indigo-50 text-indigo-600 font-semibold border-r-4 border-indigo-600 flex items-center gap-3 w-full text-left px-4 py-3 rounded-lg transition-colors whitespace-nowrap md:whitespace-normal">
-                <span class="text-lg">📊</span>
-                <span class="text-sm font-medium">Visión General</span>
+        <!-- Botones de Navegación: Deslizable horizontalmente en Android, vertical en Escritorio -->
+        <div class="flex flex-row md:flex-col overflow-x-auto md:overflow-visible p-2 md:p-3 gap-1 flex-grow scrollbar-none smooth-scroll bg-slate-50/50 md:bg-white">
+            <button onclick="app.navigate('dashboard')" id="nav-dashboard" class="nav-btn bg-indigo-50 text-indigo-600 font-semibold border-b-2 md:border-b-0 md:border-r-4 border-indigo-600 flex items-center gap-2.5 px-4 py-3 rounded-lg transition-colors whitespace-nowrap min-w-[130px] md:min-w-0 justify-center md:justify-start">
+                <span class="text-base">📊</span>
+                <span class="text-xs md:text-sm font-medium">Visión General</span>
             </button>
-            <button onclick="app.navigate('temario')" id="nav-temario" class="nav-btn text-slate-600 hover:bg-slate-50 flex items-center gap-3 w-full text-left px-4 py-3 rounded-lg transition-colors whitespace-nowrap md:whitespace-normal">
-                <span class="text-lg">🗂️</span>
-                <span class="text-sm font-medium">Explorador de Unidades</span>
+            <button onclick="app.navigate('temario')" id="nav-temario" class="nav-btn text-slate-600 hover:bg-slate-100/70 flex items-center gap-2.5 px-4 py-3 rounded-lg transition-colors whitespace-nowrap min-w-[150px] md:min-w-0 justify-center md:justify-start">
+                <span class="text-base">🗂️</span>
+                <span class="text-xs md:text-sm font-medium">Explorador de Unidades</span>
             </button>
-            <button onclick="app.navigate('cli')" id="nav-cli" class="nav-btn text-slate-600 hover:bg-slate-50 flex items-center gap-3 w-full text-left px-4 py-3 rounded-lg transition-colors whitespace-nowrap md:whitespace-normal">
-                <span class="text-lg">💻</span>
-                <span class="text-sm font-medium">Simulador IOS</span>
+            <button onclick="app.navigate('cli')" id="nav-cli" class="nav-btn text-slate-600 hover:bg-slate-100/70 flex items-center gap-2.5 px-4 py-3 rounded-lg transition-colors whitespace-nowrap min-w-[130px] md:min-w-0 justify-center md:justify-start">
+                <span class="text-base">💻</span>
+                <span class="text-xs md:text-sm font-medium">Simulador IOS</span>
             </button>
-            <button onclick="app.navigate('interactivo')" id="nav-interactivo" class="nav-btn text-slate-600 hover:bg-slate-50 flex items-center gap-3 w-full text-left px-4 py-3 rounded-lg transition-colors whitespace-nowrap md:whitespace-normal">
-                <span class="text-lg">🔗</span>
-                <span class="text-sm font-medium">Conexiones Clave</span>
+            <button onclick="app.navigate('interactivo')" id="nav-interactivo" class="nav-btn text-slate-600 hover:bg-slate-100/70 flex items-center gap-2.5 px-4 py-3 rounded-lg transition-colors whitespace-nowrap min-w-[140px] md:min-w-0 justify-center md:justify-start">
+                <span class="text-base">🔗</span>
+                <span class="text-xs md:text-sm font-medium">Conexiones Clave</span>
             </button>
         </div>
 
-        <div class="hidden md:block p-4 border-t border-slate-200 bg-slate-50 text-center flex-shrink-0">
-            <p class="text-[10px] text-slate-500 font-semibold leading-tight uppercase">ITSNCG - Ing. Sistemas</p>
+        <div class="hidden md:block p-4 border-t border-slate-200 bg-slate-50 text-center flex-shrink-0 text-xs">
+            <p class="text-[10px] text-slate-500 font-bold uppercase">ITSNCG - Ing. Sistemas</p>
             <p class="text-[9px] text-slate-400 mt-0.5">Nuevo Casas Grandes, Chih.</p>
         </div>
     </nav>
 
-    <!-- ÁREA DE CONTENIDO PRINCIPAL (HERMÉTICO CONTRA DESBORDAMIENTOS) -->
-    <main class="flex-grow flex flex-col min-w-0 min-h-0 overflow-hidden bg-slate-50 p-4 md:p-6 lg:p-8 relative">
+    <!-- ÁREA DE CONTENIDO PRINCIPAL -->
+    <main class="flex-grow flex flex-col min-w-0 bg-slate-50 p-4 md:p-6 lg:p-8 overflow-y-auto smooth-scroll">
 
         <!-- SECCIÓN 1: DASHBOARD DE BIENVENIDA -->
-        <section id="view-dashboard" class="view-section flex-grow flex flex-col min-h-0 w-full max-w-5xl mx-auto space-y-6">
-            <!-- Header Fijo -->
-            <header class="flex-shrink-0 flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <section id="view-dashboard" class="view-section flex flex-col space-y-6 max-w-5xl mx-auto w-full">
+            <header class="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
                     <h2 class="text-2xl md:text-3xl font-black text-slate-900 tracking-tight">Instrumentación Didáctica 2026</h2>
-                    <p class="text-slate-500 text-sm mt-1">Supervisa tu avance integral del semestre, objetivos, ponderaciones de evaluación y bibliografía recomendada.</p>
+                    <p class="text-slate-500 text-xs md:text-sm mt-1">Supervisa tu avance integral del semestre, objetivos, ponderaciones de evaluación y bibliografía recomendada.</p>
                 </div>
-                <!-- PANEL DOCENTE: CARGAR ARCHIVO EXCEL -->
-                <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-3 flex flex-col sm:flex-row items-center gap-3 flex-shrink-0">
+                
+                <!-- PORTAL DOCENTE PARA CARGAR EXCEL -->
+                <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-3 flex flex-row items-center justify-between sm:justify-start gap-3 flex-shrink-0">
                     <div class="text-left">
-                        <span class="text-[10px] font-bold text-indigo-600 uppercase tracking-widest block">Acceso Docente</span>
-                        <span class="text-xs font-semibold text-slate-600">Cargar Excel (.xlsx / .csv)</span>
+                        <span class="text-[9px] font-bold text-indigo-600 uppercase block">Acceso Docente</span>
+                        <span class="text-[11px] font-semibold text-slate-600">Base de Datos de Alumnos</span>
                     </div>
-                    <div class="flex items-center gap-2">
-                        <label class="cursor-pointer bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs px-3 py-2 rounded-lg transition-colors flex items-center gap-1.5 shadow-sm">
+                    <div class="flex items-center gap-1.5">
+                        <label class="cursor-pointer bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-[11px] px-3 py-2.5 rounded-lg transition-colors flex items-center gap-1 shadow-sm min-h-[40px]">
                             <span>📁 Subir Excel</span>
                             <input type="file" id="excel-file-input" accept=".xlsx, .xls, .csv" class="hidden" onchange="app.handleExcelUpload(event)">
                         </label>
-                        <button onclick="app.downloadExcelTemplate()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs px-3 py-2 rounded-lg transition-colors flex items-center gap-1" title="Descargar plantilla de Excel para llenar calificaciones">
-                            <span>📥 Plantilla</span>
+                        <button onclick="app.downloadExcelTemplate()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-[11px] px-2.5 py-2.5 rounded-lg transition-colors flex items-center gap-1 min-h-[40px]" title="Descargar plantilla de Excel">
+                            <span>📥</span>
                         </button>
                     </div>
                 </div>
             </header>
 
-            <!-- Scroll Interno del Dashboard -->
-            <div class="flex-grow overflow-y-auto pr-1 space-y-6">
-                <!-- Toast de confirmación de Excel -->
-                <div id="excel-toast" class="hidden bg-emerald-50 border border-emerald-200 rounded-xl p-4 flex items-center justify-between transition-all animate-fade">
-                    <div class="flex items-center gap-3">
-                        <span class="text-2xl">✅</span>
-                        <div>
-                            <h4 class="text-xs font-extrabold text-emerald-800 uppercase tracking-wider">¡Base de datos de calificaciones cargada con éxito!</h4>
-                            <p class="text-xs text-emerald-700 font-medium">Los alumnos ya pueden buscar su número de control en la pestaña "Explorador de Unidades".</p>
-                        </div>
-                    </div>
-                    <button onclick="document.getElementById('excel-toast').classList.add('hidden')" class="text-emerald-500 hover:text-emerald-700 font-bold text-sm">✕</button>
-                </div>
-
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                    <div class="bg-white rounded-xl p-5 shadow-sm border border-slate-200 flex flex-col justify-between">
-                        <span class="text-xs text-slate-400 font-bold uppercase tracking-wider">Titular de la Materia</span>
-                        <span class="text-sm font-bold text-indigo-700 mt-2">M.G.T.I Isaac Neftali Molina Cepeda</span>
-                    </div>
-                    <div class="bg-white rounded-xl p-5 shadow-sm border border-slate-200 flex flex-col justify-between">
-                        <span class="text-xs text-slate-400 font-bold uppercase tracking-wider">Periodo Académico</span>
-                        <span class="text-sm font-bold text-slate-800 mt-2">Agosto - Diciembre 2026</span>
-                    </div>
-                    <div class="bg-white rounded-xl p-5 shadow-sm border border-slate-200 flex flex-col justify-between">
-                        <span class="text-xs text-slate-400 font-bold uppercase tracking-wider">Horas de Clase</span>
-                        <span class="text-sm font-bold text-slate-800 mt-2">2 Teoría - 3 Práctica (5 Cred)</span>
-                    </div>
-                    <div class="bg-white rounded-xl p-5 shadow-sm border border-slate-200 flex flex-col justify-between">
-                        <span class="text-xs text-slate-400 font-bold uppercase tracking-wider">Temas Totales</span>
-                        <div class="flex items-baseline gap-1 mt-2">
-                            <span id="dashboard-total-count" class="text-2xl font-black text-indigo-600">27</span>
-                            <span class="text-xs text-slate-500 font-semibold">conceptos</span>
-                        </div>
+            <!-- Alerta / Toast de Carga exitosa de Calificaciones -->
+            <div id="excel-toast" class="hidden bg-emerald-50 border border-emerald-200 rounded-xl p-4 flex items-center justify-between transition-all">
+                <div class="flex items-center gap-3">
+                    <span class="text-xl">✅</span>
+                    <div>
+                        <h4 class="text-xs font-extrabold text-emerald-800 uppercase">¡Base de datos cargada con éxito!</h4>
+                        <p class="text-[11px] text-emerald-700 font-medium">Busca las calificaciones por número de control en el "Explorador de Unidades".</p>
                     </div>
                 </div>
+                <button onclick="document.getElementById('excel-toast').classList.add('hidden')" class="text-emerald-500 text-sm font-bold p-1">✕</button>
+            </div>
 
-                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    <div class="lg:col-span-2 bg-gradient-to-br from-indigo-900 to-slate-900 text-white rounded-xl p-6 shadow-md flex flex-col justify-between relative overflow-hidden">
-                        <div class="z-10">
-                            <span class="text-xs font-bold uppercase tracking-wider text-indigo-300">Competencia de la Asignatura</span>
-                            <h3 class="text-lg md:text-xl font-extrabold mt-3 leading-relaxed">
-                                "Diseña y elabora un proyecto de cableado estructurado aplicando normas y estándares vigentes para la solución de problemas de conectividad."
-                            </h3>
-                        </div>
-                        <p class="text-xs text-indigo-200 mt-6 font-mono z-10">✓ Alineado bajo estándares del CACEI</p>
+            <!-- Fichas de Información General -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div class="bg-white rounded-xl p-4 shadow-sm border border-slate-200 flex flex-col justify-between">
+                    <span class="text-[10px] text-slate-400 font-bold uppercase">Titular de la Materia</span>
+                    <span class="text-sm font-bold text-indigo-700 mt-1">M.G.T.I Isaac Neftali Molina Cepeda</span>
+                </div>
+                <div class="bg-white rounded-xl p-4 shadow-sm border border-slate-200 flex flex-col justify-between">
+                    <span class="text-[10px] text-slate-400 font-bold uppercase">Periodo Académico</span>
+                    <span class="text-sm font-bold text-slate-800 mt-1">Agosto - Diciembre 2026</span>
+                </div>
+                <div class="bg-white rounded-xl p-4 shadow-sm border border-slate-200 flex flex-col justify-between">
+                    <span class="text-[10px] text-slate-400 font-bold uppercase">Horas de Clase</span>
+                    <span class="text-sm font-bold text-slate-800 mt-1">2 Teoría - 3 Práctica (5 Cred)</span>
+                </div>
+                <div class="bg-white rounded-xl p-4 shadow-sm border border-slate-200 flex flex-col justify-between">
+                    <span class="text-[10px] text-slate-400 font-bold uppercase">Temas Totales</span>
+                    <div class="flex items-baseline gap-1 mt-1">
+                        <span id="dashboard-total-count" class="text-xl font-black text-indigo-600">27</span>
+                        <span class="text-xs text-slate-500 font-semibold">conceptos</span>
                     </div>
+                </div>
+            </div>
 
-                    <div class="bg-white rounded-xl p-6 shadow-sm border border-slate-200 flex flex-col justify-between">
-                        <span class="text-xs text-slate-400 font-bold uppercase tracking-wider mb-2">Avance Académico Semestral</span>
-                        <div class="flex flex-col items-center justify-center py-4">
-                            <span id="dashboard-progress-big" class="text-5xl font-black text-slate-800">0%</span>
-                            <span class="text-xs text-slate-500 mt-1 font-semibold">Temas dominados</span>
-                        </div>
-                        <p class="text-[10px] text-slate-400 text-center leading-normal">
-                            Para actualizar, marca los subtemas completados en el <span class="font-semibold text-indigo-600 cursor-pointer" onclick="app.navigate('temario')">Explorador de Unidades</span>.
-                        </p>
+            <!-- Competencia General de la Asignatura -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div class="lg:col-span-2 bg-gradient-to-br from-indigo-900 to-slate-900 text-white rounded-xl p-6 shadow-md flex flex-col justify-between relative overflow-hidden">
+                    <div>
+                        <span class="text-[10px] font-bold uppercase tracking-wider text-indigo-300">Competencia de la Asignatura</span>
+                        <h3 class="text-base md:text-lg font-extrabold mt-2 leading-relaxed">
+                            "Diseña y elabora un proyecto de cableado estructurado aplicando normas y estándares vigentes para la solución de problemas de conectividad."
+                        </h3>
+                    </div>
+                    <p class="text-[10px] text-indigo-200 mt-4 font-mono">✓ Cumplimiento bajo normativas CACEI</p>
+                </div>
+
+                <div class="bg-white rounded-xl p-5 shadow-sm border border-slate-200 flex flex-col justify-between">
+                    <span class="text-[10px] text-slate-400 font-bold uppercase mb-2">Avance Global del Curso</span>
+                    <div class="flex flex-col items-center justify-center py-2">
+                        <span id="dashboard-progress-big" class="text-4xl font-black text-slate-800">0%</span>
+                        <span class="text-[11px] text-slate-500 mt-0.5 font-semibold">Temas dominados</span>
+                    </div>
+                    <p class="text-[9px] text-slate-400 text-center leading-normal">
+                        Marca los temas estudiados en el <span class="font-semibold text-indigo-600 cursor-pointer" onclick="app.navigate('temario')">Explorador de Unidades</span>.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Gráfico y Bibliografía -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4 md:p-6 flex flex-col justify-between">
+                    <div>
+                        <h4 class="font-extrabold text-slate-800 text-sm md:text-base">Distribución Temática y Avance</h4>
+                        <p class="text-[11px] text-slate-500 mt-0.5">Mapeo del avance de subtemas por cada unidad.</p>
+                    </div>
+                    <!-- Altura controlada para evitar desbordes -->
+                    <div class="chart-container my-4 relative">
+                        <canvas id="syllabusChart"></canvas>
                     </div>
                 </div>
 
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 flex flex-col justify-between">
-                        <div>
-                            <h4 class="font-extrabold text-slate-800 text-base">Distribución Temática y Avance de Estudio</h4>
-                            <p class="text-xs text-slate-500 mt-0.5">Mapeo del volumen y cantidad de contenidos de la asignatura.</p>
-                        </div>
-                        <!-- Contenedor rígido para evitar colapsos de Chart.js -->
-                        <div class="h-64 flex-shrink-0 w-full relative my-4">
-                            <canvas id="syllabusChart"></canvas>
-                        </div>
-                    </div>
-
-                    <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 flex flex-col justify-between">
-                        <div>
-                            <h4 class="font-extrabold text-slate-800 text-base mb-3">Fuentes Bibliográficas de Referencia</h4>
-                            <div class="space-y-3">
-                                <div class="p-3 bg-slate-50 rounded-lg border border-slate-100 flex gap-3">
-                                    <span class="text-xl">📘</span>
-                                    <div>
-                                        <h5 class="text-xs font-bold text-slate-700">Redes de Computadoras (5ta Edición)</h5>
-                                        <p class="text-[11px] text-slate-500">Andrew S. Tanenbaum (Pearson Educación) - Biblioteca</p>
-                                    </div>
+                <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4 md:p-6 flex flex-col justify-between">
+                    <div>
+                        <h4 class="font-extrabold text-slate-800 text-sm md:text-base mb-3">Fuentes de Consulta Oficiales</h4>
+                        <div class="space-y-2">
+                            <div class="p-2.5 bg-slate-50 rounded-lg border border-slate-100 flex gap-3 items-center">
+                                <span class="text-lg">📘</span>
+                                <div>
+                                    <h5 class="text-[11px] font-bold text-slate-700">Redes de Computadoras (5ta Edición)</h5>
+                                    <p class="text-[10px] text-slate-500">Andrew S. Tanenbaum (Pearson Educación)</p>
                                 </div>
-                                <div class="p-3 bg-slate-50 rounded-lg border border-slate-100 flex gap-3">
-                                    <span class="text-xl">📕</span>
-                                    <div>
-                                        <h5 class="text-xs font-bold text-slate-700">CCNA ICND2 Official Exam Guide</h5>
-                                        <p class="text-[11px] text-slate-500">Wendell Odom (Cisco Press) - Manual para Packet Tracer</p>
-                                    </div>
+                            </div>
+                            <div class="p-2.5 bg-slate-50 rounded-lg border border-slate-100 flex gap-3 items-center">
+                                <span class="text-lg">📕</span>
+                                <div>
+                                    <h5 class="text-[11px] font-bold text-slate-700">CCNA ICND2 Official Exam Guide</h5>
+                                    <p class="text-[10px] text-slate-500">Wendell Odom (Cisco Press)</p>
                                 </div>
-                                <div class="p-3 bg-slate-50 rounded-lg border border-slate-100 flex gap-3">
-                                    <span class="text-xl">📙</span>
-                                    <div>
-                                        <h5 class="text-xs font-bold text-slate-700">Diseño de Redes Telemáticas</h5>
-                                        <p class="text-[11px] text-slate-500">Manuel Santos González (Editorial RA-MA) - Referencia Física</p>
-                                    </div>
+                            </div>
+                            <div class="p-2.5 bg-slate-50 rounded-lg border border-slate-100 flex gap-3 items-center">
+                                <span class="text-lg">📙</span>
+                                <div>
+                                    <h5 class="text-[11px] font-bold text-slate-700">Diseño de Redes Telemáticas</h5>
+                                    <p class="text-[10px] text-slate-500">Manuel Santos González (Editorial RA-MA)</p>
                                 </div>
                             </div>
                         </div>
-                        <p class="text-[10px] text-slate-400 mt-4 italic leading-tight">Consulte los manuales del laboratorio que se publiquen en su canal institucional.</p>
                     </div>
+                    <p class="text-[9px] text-slate-400 mt-3 italic leading-tight">Consulte los manuales del laboratorio provistos por el docente.</p>
                 </div>
             </div>
         </section>
 
         <!-- SECCIÓN 2: EXPLORADOR DE UNIDADES DETALLADO -->
-        <section id="view-temario" class="view-section flex-grow flex flex-col min-h-0 w-full max-w-6xl mx-auto space-y-4 hidden">
-            <!-- Header Fijo -->
-            <header class="flex-shrink-0">
-                <h2 class="text-2xl md:text-3xl font-black text-slate-900 tracking-tight">Explorador de Unidades y Consulta de Calificaciones</h2>
-                <p class="text-slate-500 text-sm mt-1">Revisa las competencias específicas, consulta tus calificaciones personales por medio de tu número de control y haz el seguimiento del programa.</p>
+        <section id="view-temario" class="view-section flex-grow flex flex-col space-y-4 hidden max-w-6xl mx-auto w-full">
+            <header>
+                <h2 class="text-2xl md:text-3xl font-black text-slate-900 tracking-tight">Explorador de Unidades y Calificaciones</h2>
+                <p class="text-slate-500 text-xs md:text-sm mt-1">Revisa el programa, marca tus temas de estudio y consulta tus calificaciones del semestre mediante tu número de control.</p>
             </header>
 
-            <!-- Grid Flexible con scroll independiente -->
-            <div class="flex-grow flex flex-col lg:flex-row gap-6 min-h-0 overflow-hidden">
-                <!-- Tarjetas de Unidades (Scroll lateral en móvil, vertical en escritorio) -->
-                <div class="w-full lg:w-5/12 flex flex-row lg:flex-col gap-3 overflow-x-auto lg:overflow-y-auto pr-0 lg:pr-1 flex-shrink-0 lg:flex-shrink" id="unit-cards-container">
+            <div class="flex flex-col lg:flex-row gap-5">
+                <!-- Tarjetas de Unidades: Scroll horizontal deslizable en Android para optimizar espacio -->
+                <div class="w-full lg:w-5/12 flex flex-row lg:flex-col overflow-x-auto lg:overflow-y-auto gap-3 p-1 shrink-0 smooth-scroll scrollbar-none" id="unit-cards-container">
                     <!-- Dinámico -->
                 </div>
 
-                <!-- Detalle de la Unidad (Scroll Vertical) -->
-                <div class="w-full lg:w-7/12 bg-white rounded-xl shadow-md border border-slate-200 flex flex-col min-h-0 overflow-hidden">
-                    <div id="detail-empty-state" class="p-12 flex flex-col items-center justify-center h-full text-slate-400 text-center">
-                        <span class="text-6xl mb-4">👈</span>
-                        <h4 class="text-lg font-bold">Selecciona una unidad temática</h4>
-                        <p class="text-sm mt-1 max-w-xs">Haz clic en cualquiera de las 5 unidades para analizar sus temas, competencias, actividades sugeridas y calificaciones.</p>
+                <!-- Detalle de la Unidad Seleccionada -->
+                <div class="w-full lg:w-7/12 bg-white rounded-xl shadow-md border border-slate-200 flex flex-col overflow-hidden">
+                    <div id="detail-empty-state" class="p-8 flex flex-col items-center justify-center text-slate-400 text-center min-h-[250px]">
+                        <span class="text-4xl mb-2">👈</span>
+                        <h4 class="text-sm font-bold text-slate-700">Selecciona una unidad</h4>
+                        <p class="text-xs text-slate-500 mt-1 max-w-[280px]">Toca cualquiera de las unidades del listado para cargar sus temas y el portal de consulta de notas.</p>
                     </div>
 
-                    <div id="detail-active-state" class="hidden flex flex-col h-full overflow-hidden">
-                        <!-- Título de Unidad Fijo -->
-                        <div class="p-5 border-b border-slate-200 bg-slate-50 flex items-center justify-between flex-shrink-0">
-                            <div class="flex items-center gap-4">
-                                <span id="active-unit-icon" class="text-3xl p-2 bg-white rounded-xl shadow-sm border border-slate-100">🚀</span>
-                                <div>
-                                    <span id="active-unit-label" class="text-xs font-bold text-indigo-600 uppercase tracking-wider">Unidad 1</span>
-                                    <h3 id="active-unit-title" class="text-lg font-extrabold text-slate-950 leading-tight">Introducción a Redes de Datos</h3>
-                                </div>
+                    <div id="detail-active-state" class="hidden flex flex-col h-full">
+                        <!-- Cabecera de la Unidad Seleccionada -->
+                        <div class="p-4 bg-slate-50 border-b border-slate-200 flex items-center gap-3">
+                            <span id="active-unit-icon" class="text-2xl p-1.5 bg-white rounded-lg shadow-sm">🚀</span>
+                            <div>
+                                <span id="active-unit-label" class="text-[9px] font-bold text-indigo-600 uppercase block tracking-wider">Unidad 1</span>
+                                <h3 id="active-unit-title" class="text-sm md:text-base font-extrabold text-slate-900 leading-tight">Introducción a Redes</h3>
                             </div>
                         </div>
 
-                        <!-- Barra de Tabs Fija -->
-                        <div class="flex border-b border-slate-200 bg-white px-6 flex-shrink-0 overflow-x-auto">
-                            <button onclick="app.switchTab('temario')" id="tab-temario" class="tab-btn-active py-3 px-4 border-b-2 border-transparent text-sm font-semibold text-slate-600 hover:text-indigo-600 transition-colors whitespace-nowrap">
-                                Temas & Progreso
+                        <!-- Pestañas internas de la unidad (Optimizadas para pantallas estrechas) -->
+                        <div class="flex border-b border-slate-200 bg-white px-2 overflow-x-auto smooth-scroll scrollbar-none flex-shrink-0">
+                            <button onclick="app.switchTab('temario')" id="tab-temario" class="tab-btn-active py-3 px-3.5 text-xs font-semibold text-slate-600 hover:text-indigo-600 whitespace-nowrap min-h-[44px]">
+                                Temas
                             </button>
-                            <button onclick="app.switchTab('evaluacion')" id="tab-evaluacion" class="py-3 px-4 border-b-2 border-transparent text-sm font-semibold text-slate-600 hover:text-indigo-600 transition-colors whitespace-nowrap">
-                                Consulta de Calificación
+                            <button onclick="app.switchTab('evaluacion')" id="tab-evaluacion" class="py-3 px-3.5 text-xs font-semibold text-slate-600 hover:text-indigo-600 whitespace-nowrap min-h-[44px]">
+                                Mi Calificación
                             </button>
-                            <button onclick="app.switchTab('actividades')" id="tab-actividades" class="py-3 px-4 border-b-2 border-transparent text-sm font-semibold text-slate-600 hover:text-indigo-600 transition-colors whitespace-nowrap">
-                                Actividades de Clase
+                            <button onclick="app.switchTab('actividades')" id="tab-actividades" class="py-3 px-3.5 text-xs font-semibold text-slate-600 hover:text-indigo-600 whitespace-nowrap min-h-[44px]">
+                                Actividades
                             </button>
                         </div>
 
-                        <!-- Panel Interno Con Scroll Propio -->
-                        <div class="p-6 overflow-y-auto flex-grow space-y-6">
+                        <!-- Contenedor Desplazable del Detalle -->
+                        <div class="p-4 md:p-6 overflow-y-auto smooth-scroll space-y-5 flex-grow">
                             <!-- TAB: Temas & Progreso -->
                             <div id="panel-temario" class="tab-panel space-y-4">
-                                <div class="bg-indigo-50 border-l-4 border-indigo-600 p-4 rounded-r-xl">
-                                    <h5 class="text-xs font-bold text-indigo-700 uppercase tracking-wide">Competencia Específica</h5>
-                                    <p id="active-unit-competencia" class="text-xs font-semibold text-slate-700 mt-1 leading-relaxed">
-                                        Analiza las características y clasificación de las topologías de redes para seleccionar la más adecuada de acuerdo a las necesidades.
-                                    </p>
+                                <div class="bg-indigo-50 border-l-4 border-indigo-600 p-3 rounded-r-xl">
+                                    <h5 class="text-[10px] font-black text-indigo-700 uppercase">Competencia Específica</h5>
+                                    <p id="active-unit-competencia" class="text-xs font-semibold text-slate-700 mt-1 leading-relaxed"></p>
                                 </div>
-                                <div class="space-y-2">
-                                    <h5 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Desglose de Temas de Estudio</h5>
-                                    <div id="active-unit-topics-list" class="space-y-2">
+                                <div class="space-y-1.5">
+                                    <h5 class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">Desglose de Temas de Estudio</h5>
+                                    <div id="active-unit-topics-list" class="space-y-1.5">
                                     </div>
                                 </div>
                             </div>
 
                             <!-- TAB: Consulta de Calificación -->
-                            <div id="panel-evaluacion" class="tab-panel hidden space-y-6">
-                                <div class="bg-slate-50 border border-slate-200 rounded-xl p-5">
-                                    <h5 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Consulta de Calificaciones Personales</h5>
-                                    <p class="text-xs text-slate-500 mb-4">Ingresa tu número de control oficial para validar tus notas.</p>
+                            <div id="panel-evaluacion" class="tab-panel hidden space-y-4">
+                                <div class="bg-slate-50 border border-slate-200 rounded-xl p-4">
+                                    <h5 class="text-[10px] font-black text-slate-500 uppercase mb-1">Consulta de Calificación Oficial</h5>
+                                    <p class="text-[11px] text-slate-500 mb-3">Ingresa tu número de control oficial para validar tus notas en el sistema.</p>
                                     
                                     <div class="flex gap-2">
-                                        <input type="text" id="student-search-control" placeholder="Ej: 22100001" class="flex-grow bg-white border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                                        <button onclick="app.queryGrades()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs px-4 py-2 rounded-lg transition-colors shadow-sm">
+                                        <!-- Tamaño óptimo para interactuar en móvil -->
+                                        <input type="text" id="student-search-control" placeholder="Ej: 22100001" class="flex-grow bg-white border border-slate-300 rounded-lg px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500 min-h-[44px]">
+                                        <button onclick="app.queryGrades()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs px-4 py-2 rounded-lg transition-colors shadow-sm min-h-[44px]">
                                             Consultar
                                         </button>
                                     </div>
-                                    <p class="text-[10px] text-slate-400 mt-1.5 italic">Prueba con los números de control preinstalados: 22100001, 22100002 o 22100003.</p>
+                                    <p class="text-[9px] text-slate-400 mt-1.5 italic">Prueba con los números demo: 22100001, 22100002 o 22100003.</p>
                                 </div>
 
-                                <!-- Contenedor de Resultado de Calificación -->
+                                <!-- Resultado de Calificación -->
                                 <div id="grade-result-container" class="hidden space-y-4">
-                                    <div class="bg-white border border-slate-200 rounded-xl p-4 flex items-center justify-between shadow-sm">
-                                        <div>
-                                            <span class="text-[10px] font-bold text-indigo-600 uppercase tracking-widest block">Estudiante</span>
-                                            <h4 id="result-student-name" class="text-base font-extrabold text-slate-800">Juan Pérez Gómez</h4>
-                                            <span id="result-student-control" class="text-xs text-slate-500 font-mono">Control: 22100001</span>
+                                    <div class="bg-white border border-slate-200 rounded-xl p-4 flex items-center justify-between shadow-sm gap-2">
+                                        <div class="min-w-0">
+                                            <span class="text-[9px] font-bold text-indigo-600 uppercase block">Estudiante</span>
+                                            <h4 id="result-student-name" class="text-xs md:text-sm font-extrabold text-slate-800 truncate">Ana Sofía Guerrero</h4>
+                                            <span id="result-student-control" class="text-[10px] text-slate-400 font-mono block">Control: 22100001</span>
                                         </div>
-                                        <div class="text-right">
-                                            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest block">Nota Obtenida</span>
-                                            <span id="result-unit-total" class="text-3xl font-black text-indigo-600">95 / 100</span>
-                                            <span id="result-unit-badge" class="block text-[10px] font-extrabold uppercase mt-1">Aprobado</span>
+                                        <div class="text-right flex-shrink-0">
+                                            <span id="result-unit-total" class="text-xl md:text-2xl font-black text-indigo-600">95 / 100</span>
+                                            <span id="result-unit-badge" class="block text-[8px] font-bold uppercase mt-1">Aprobado</span>
                                         </div>
                                     </div>
 
-                                    <!-- Tabla de Desglose de Criterios -->
                                     <div class="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
                                         <div class="bg-slate-50 px-4 py-2 border-b border-slate-200">
-                                            <h5 class="text-xs font-bold text-slate-600 uppercase">Detalle de Ponderaciones</h5>
+                                            <h5 class="text-[10px] font-bold text-slate-600 uppercase">Detalle de Ponderaciones</h5>
                                         </div>
                                         <div class="divide-y divide-slate-150" id="result-grade-breakdown">
-                                            <!-- Dinámico -->
                                         </div>
                                     </div>
 
-                                    <!-- Resumen Semestral Global del Alumno -->
-                                    <div class="bg-slate-50 border border-slate-200 rounded-xl p-4">
-                                        <h5 class="text-xs font-bold text-slate-600 uppercase tracking-wider mb-2">Estatus Global del Semestre (Agosto - Diciembre 2026)</h5>
-                                        <div class="grid grid-cols-5 gap-2 text-center" id="result-global-summary">
-                                            <!-- Dinámico (Unidades 1 a 5 con estatus) -->
+                                    <div class="bg-slate-50 border border-slate-200 rounded-xl p-3">
+                                        <h5 class="text-[9px] font-bold text-slate-500 uppercase mb-2">Estatus Global del Semestre (Agosto - Diciembre 2026)</h5>
+                                        <div class="grid grid-cols-5 gap-1.5 text-center" id="result-global-summary">
                                         </div>
                                     </div>
                                 </div>
 
-                                <div id="grade-not-found-container" class="hidden p-6 bg-red-50 border border-red-200 rounded-xl text-center text-red-700">
-                                    <span class="text-2xl block mb-2">⚠️</span>
-                                    <h4 class="text-sm font-bold">Número de control no localizado</h4>
-                                    <p class="text-xs mt-1">Por favor, verifica el número de control o solicita al profesor actualizar la base de datos de Excel.</p>
+                                <div id="grade-not-found-container" class="hidden p-4 bg-red-50 border border-red-200 rounded-xl text-center text-red-700">
+                                    <span class="text-lg block mb-1">⚠️</span>
+                                    <h4 class="text-xs font-bold">Número de control no localizado</h4>
+                                    <p class="text-[10px] mt-0.5">Verifica los dígitos o carga el archivo de notas.</p>
                                 </div>
                             </div>
 
                             <!-- TAB: Actividades Académicas -->
-                            <div id="panel-actividades" class="tab-panel hidden space-y-6">
+                            <div id="panel-actividades" class="tab-panel hidden space-y-4">
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <div class="bg-blue-50/50 border border-blue-100 rounded-xl p-4">
-                                        <div class="flex items-center gap-2 mb-3">
-                                            <span class="text-lg">🧑‍💻</span>
-                                            <h5 class="text-xs font-bold text-blue-900 uppercase tracking-wider">Actividades de Aprendizaje</h5>
-                                        </div>
-                                        <ul id="active-unit-learning-activities" class="space-y-2 text-xs text-blue-950 font-medium list-disc list-inside">
+                                    <div class="bg-blue-50/50 border border-blue-100 rounded-xl p-3.5">
+                                        <h5 class="text-[10px] font-bold text-blue-900 uppercase mb-2">Actividades de Aprendizaje</h5>
+                                        <ul id="active-unit-learning-activities" class="space-y-1.5 text-xs text-blue-950 font-medium list-disc list-inside">
                                         </ul>
                                     </div>
 
-                                    <div class="bg-indigo-50/50 border border-indigo-100 rounded-xl p-4">
-                                        <div class="flex items-center gap-2 mb-3">
-                                            <span class="text-lg">👨‍🏫</span>
-                                            <h5 class="text-xs font-bold text-indigo-900 uppercase tracking-wider">Actividades de Enseñanza</h5>
-                                        </div>
-                                        <ul id="active-unit-teaching-activities" class="space-y-2 text-xs text-indigo-950 font-medium list-disc list-inside">
+                                    <div class="bg-indigo-50/50 border border-indigo-100 rounded-xl p-3.5">
+                                        <h5 class="text-[10px] font-bold text-indigo-900 uppercase mb-2">Actividades de Enseñanza</h5>
+                                        <ul id="active-unit-teaching-activities" class="space-y-1.5 text-xs text-indigo-950 font-medium list-disc list-inside">
                                         </ul>
                                     </div>
                                 </div>
@@ -424,38 +404,36 @@
         </section>
 
         <!-- SECCIÓN 3: INTERACTIVE IOS TERMINAL -->
-        <section id="view-cli" class="view-section flex-grow flex-1 h-full flex flex-col min-h-0 w-full max-w-5xl mx-auto space-y-6 hidden">
-            <!-- Header Fijo -->
-            <header class="flex-shrink-0">
+        <section id="view-cli" class="view-section flex-grow flex-1 flex flex-col space-y-4 hidden max-w-5xl mx-auto w-full">
+            <header>
                 <h2 class="text-2xl md:text-3xl font-black text-slate-900 tracking-tight">Simulador IOS de Dispositivos (Cisco Mock)</h2>
-                <p class="text-slate-500 text-sm mt-1">Escribe comandos en tiempo real para practicar la inicialización de routers y switches Cisco.</p>
+                <p class="text-slate-500 text-xs md:text-sm mt-1">Escribe comandos en tiempo real para practicar la inicialización de routers y switches Cisco.</p>
             </header>
 
-            <!-- Layout adaptable a pantalla de escritorio / móvil -->
-            <div class="flex-1 flex flex-col lg:flex-row gap-6 min-h-0 overflow-y-auto lg:overflow-hidden">
-                <!-- Panel Tutoriales (Fijo en escritorio con scroll independiente) -->
-                <div class="w-full lg:w-1/3 bg-white rounded-xl shadow-sm border border-slate-200 p-5 flex flex-col justify-between flex-shrink-0 lg:flex-shrink lg:overflow-y-auto">
+            <div class="flex flex-col lg:flex-row gap-5 flex-grow min-h-0">
+                <!-- Panel Tutoriales -->
+                <div class="w-full lg:w-1/3 bg-white rounded-xl shadow-sm border border-slate-200 p-4 flex flex-col justify-between shrink-0">
                     <div>
-                        <h4 class="font-bold text-slate-800 text-base mb-3">Guías de Configuración IOS</h4>
-                        <div class="space-y-2">
-                            <button onclick="app.setTutorial(1)" id="tut-1" class="w-full text-left p-3 rounded-lg border-2 border-slate-100 hover:border-indigo-200 bg-slate-50 transition-all">
-                                <span class="text-xs font-extrabold text-indigo-600 uppercase tracking-wide block">Paso 1</span>
-                                <span class="text-xs font-bold text-slate-700 leading-tight">Acceder al Modo Privilegiado y Configurar Hostname</span>
+                        <h4 class="font-bold text-slate-800 text-sm md:text-base mb-2">Guías de Configuración IOS</h4>
+                        <div class="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-1 gap-2">
+                            <button onclick="app.setTutorial(1)" class="text-left p-2.5 rounded-lg border-2 border-slate-100 hover:border-indigo-200 bg-slate-50 transition-all min-h-[44px]">
+                                <span class="text-[9px] font-black text-indigo-600 uppercase block leading-tight">Paso 1</span>
+                                <span class="text-[10px] font-bold text-slate-700 leading-tight block">Modo Privilegiado & Hostname</span>
                             </button>
-                            <button onclick="app.setTutorial(2)" id="tut-2" class="w-full text-left p-3 rounded-lg border-2 border-slate-100 hover:border-indigo-200 bg-slate-50 transition-all">
-                                <span class="text-xs font-extrabold text-indigo-600 uppercase tracking-wide block">Paso 2</span>
-                                <span class="text-xs font-bold text-slate-700 leading-tight">Configurar IP en Interfaz FastEthernet0/0</span>
+                            <button onclick="app.setTutorial(2)" class="text-left p-2.5 rounded-lg border-2 border-slate-100 hover:border-indigo-200 bg-slate-50 transition-all min-h-[44px]">
+                                <span class="text-[9px] font-black text-indigo-600 uppercase block leading-tight">Paso 2</span>
+                                <span class="text-[10px] font-bold text-slate-700 leading-tight block">Configurar IP en FastEthernet0/0</span>
                             </button>
-                            <button onclick="app.setTutorial(3)" id="tut-3" class="w-full text-left p-3 rounded-lg border-2 border-slate-100 hover:border-indigo-200 bg-slate-50 transition-all">
-                                <span class="text-xs font-extrabold text-indigo-600 uppercase tracking-wide block">Paso 3</span>
-                                <span class="text-xs font-bold text-slate-700 leading-tight">Verificar Estado de la Interfaz</span>
+                            <button onclick="app.setTutorial(3)" class="text-left p-2.5 rounded-lg border-2 border-slate-100 hover:border-indigo-200 bg-slate-50 transition-all min-h-[44px]">
+                                <span class="text-[9px] font-black text-indigo-600 uppercase block leading-tight">Paso 3</span>
+                                <span class="text-[10px] font-bold text-slate-700 leading-tight block">Verificar Interfaz</span>
                             </button>
                         </div>
                     </div>
                     
-                    <div class="mt-4 p-4 bg-indigo-50 border border-indigo-100 rounded-lg text-xs flex-shrink-0">
-                        <strong class="text-indigo-900 block mb-1">Comandos Disponibles:</strong>
-                        <ul class="grid grid-cols-2 gap-1 text-indigo-950 font-mono text-[10px]">
+                    <div class="mt-3 p-3 bg-indigo-50 border border-indigo-100 rounded-lg text-xs">
+                        <strong class="text-indigo-900 block mb-1">Comandos de Red:</strong>
+                        <ul class="grid grid-cols-2 gap-0.5 text-indigo-950 font-mono text-[9px]">
                             <li>• enable</li>
                             <li>• configure terminal</li>
                             <li>• hostname [name]</li>
@@ -463,109 +441,104 @@
                             <li>• ip address [ip] [mask]</li>
                             <li>• no shutdown</li>
                             <li>• show ip int brief</li>
-                            <li>• exit</li>
                         </ul>
                     </div>
                 </div>
 
-                <!-- Caja de la Terminal (Fija a la derecha) -->
-                <div class="w-full lg:w-2/3 bg-slate-900 rounded-xl shadow-lg border border-slate-800 flex flex-col h-[400px] lg:h-full flex-shrink-0 lg:flex-shrink">
-                    <!-- Barra de Título Fija -->
+                <!-- Caja de la Terminal (Toque en Android enfoca teclado) -->
+                <div onclick="document.getElementById('cli-input-field').focus();" class="w-full lg:w-2/3 bg-slate-900 rounded-xl shadow-lg border border-slate-800 flex flex-col h-[280px] lg:h-auto min-h-0 flex-grow">
                     <div class="bg-slate-850 px-4 py-2 border-b border-slate-800 flex items-center justify-between flex-shrink-0">
                         <div class="flex items-center gap-2">
-                            <span class="w-3 h-3 bg-red-500 rounded-full"></span>
-                            <span class="w-3 h-3 bg-yellow-400 rounded-full"></span>
-                            <span class="w-3 h-3 bg-green-500 rounded-full"></span>
-                            <span class="text-xs text-slate-400 font-bold font-mono ml-2">Console Session (Router)</span>
+                            <span class="w-2.5 h-2.5 bg-red-500 rounded-full"></span>
+                            <span class="w-2.5 h-2.5 bg-yellow-400 rounded-full"></span>
+                            <span class="w-2.5 h-2.5 bg-green-500 rounded-full"></span>
+                            <span class="text-[10px] text-slate-400 font-bold font-mono ml-1">Consola (Cisco Router)</span>
                         </div>
-                        <span class="text-[10px] text-slate-500 uppercase font-mono font-bold">Packet Tracer Mock</span>
+                        <span class="text-[9px] text-slate-500 uppercase font-mono font-bold">Toque para escribir</span>
                     </div>
 
-                    <!-- Output de Consola con Scroll Interno -->
-                    <div id="cli-output" class="p-5 overflow-y-auto flex-1 font-mono text-xs text-slate-300 space-y-1.5 scrollbar-thin">
+                    <!-- Output de Consola -->
+                    <div id="cli-output" class="p-4 overflow-y-auto flex-1 font-mono text-[11px] text-slate-300 space-y-1 smooth-scroll scrollbar-thin">
                     </div>
 
-                    <!-- Input Fijo Abajo -->
-                    <div class="bg-slate-950 px-4 py-3 border-t border-slate-800 flex items-center gap-2 flex-shrink-0">
+                    <!-- Input Fijo -->
+                    <div class="bg-slate-950 px-4 py-2 border-t border-slate-800 flex items-center gap-1.5 flex-shrink-0 min-h-[44px]">
                         <span id="cli-prompt" class="text-green-400 font-mono text-xs font-bold">Router&gt;</span>
-                        <input type="text" id="cli-input-field" class="flex-1 bg-transparent border-none text-slate-200 font-mono text-xs focus:ring-0 focus:outline-none" placeholder="Ingresa un comando de red..." autocomplete="off">
+                        <!-- Input con propiedades optimizadas para Android (sin sugerencias de autocompletado del sistema) -->
+                        <input type="text" id="cli-input-field" class="flex-grow bg-transparent border-none text-slate-200 font-mono text-xs focus:ring-0 focus:outline-none p-1 min-h-[36px]" placeholder="Escribe aquí..." autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
                     </div>
                 </div>
             </div>
         </section>
 
         <!-- SECCIÓN 4: CONEXIONES CLAVE (OSI & HARDWARE MATRIX) -->
-        <section id="view-interactivo" class="view-section flex-grow flex-1 h-full flex flex-col min-h-0 w-full max-w-5xl mx-auto space-y-6 hidden">
-            <!-- Header Fijo -->
-            <header class="flex-shrink-0">
+        <section id="view-interactivo" class="view-section flex-grow flex-1 flex flex-col space-y-4 hidden max-w-5xl mx-auto w-full">
+            <header>
                 <h2 class="text-2xl md:text-3xl font-black text-slate-900 tracking-tight">Conexiones Clave: OSI y Dispositivos de Red</h2>
-                <p class="text-slate-500 text-sm mt-1">Conecta visualmente las capas teóricas del Modelo de Referencia OSI con el hardware físico estudiado.</p>
+                <p class="text-slate-500 text-xs md:text-sm mt-1">Conecta de manera visual las capas del Modelo de Referencia OSI con el hardware físico estudiado.</p>
             </header>
 
-            <!-- Scroll Interno de Conexiones -->
-            <div class="flex-grow flex-1 overflow-y-auto pr-1">
-                <div class="bg-white rounded-xl shadow-md border border-slate-200 p-6 md:p-8">
-                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-                        
-                        <div class="space-y-4">
-                            <h3 class="font-bold text-slate-800 text-lg mb-2 flex items-center gap-2">
-                                <span>📑</span> Capas del Modelo OSI (Unidad 2)
-                            </h3>
-                            <div class="flex flex-col gap-2">
-                                <button onclick="app.highlightDevices('superior')" id="layer-superior" class="layer-pill w-full text-left px-5 py-3.5 rounded-xl border border-slate-200 hover:border-indigo-400 text-slate-700 text-sm font-semibold transition-all">
-                                    Capas 5, 6, 7: Aplicación, Presentación y Sesión
-                                </button>
-                                <button onclick="app.highlightDevices('transporte')" id="layer-transporte" class="layer-pill w-full text-left px-5 py-3.5 rounded-xl border border-slate-200 hover:border-indigo-400 text-slate-700 text-sm font-semibold transition-all">
-                                    Capa 4: Transporte (Protocolos de Tránsito)
-                                </button>
-                                <button onclick="app.highlightDevices('red')" id="layer-red" class="layer-pill w-full text-left px-5 py-3.5 rounded-xl border border-slate-200 hover:border-indigo-400 text-slate-700 text-sm font-semibold transition-all">
-                                    Capa 3: Red (Enrutamiento Lógico)
-                                </button>
-                                <button onclick="app.highlightDevices('enlace')" id="layer-enlace" class="layer-pill w-full text-left px-5 py-3.5 rounded-xl border border-slate-200 hover:border-indigo-400 text-slate-700 text-sm font-semibold transition-all">
-                                    Capa 2: Enlace de Datos (Direccionamiento Físico MAC)
-                                </button>
-                                <button onclick="app.highlightDevices('fisica')" id="layer-fisica" class="layer-pill w-full text-left px-5 py-3.5 rounded-xl border border-slate-200 hover:border-indigo-400 text-slate-700 text-sm font-semibold transition-all">
-                                    Capa 1: Física (Señales de Medios Físicos)
-                                </button>
-                            </div>
+            <div class="bg-white rounded-xl shadow-md border border-slate-200 p-4 md:p-6 flex-grow">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+                    
+                    <div class="space-y-3">
+                        <h3 class="font-bold text-slate-800 text-sm md:text-base mb-2">
+                            <span>📑</span> Capas del Modelo OSI (Unidad 2)
+                        </h3>
+                        <div class="flex flex-col gap-2">
+                            <button onclick="app.highlightDevices('superior')" id="layer-superior" class="layer-pill w-full text-left px-4 py-3.5 rounded-xl border border-slate-200 hover:border-indigo-400 text-slate-700 text-xs md:text-sm font-semibold transition-all min-h-[44px]">
+                                Capas 5, 6, 7: Aplicación, Presentación y Sesión
+                            </button>
+                            <button onclick="app.highlightDevices('transporte')" id="layer-transporte" class="layer-pill w-full text-left px-5 py-3.5 rounded-xl border border-slate-200 hover:border-indigo-400 text-slate-700 text-sm font-semibold transition-all">
+                                Capa 4: Transporte (Protocolos de Tránsito)
+                            </button>
+                            <button onclick="app.highlightDevices('red')" id="layer-red" class="layer-pill w-full text-left px-5 py-3.5 rounded-xl border border-slate-200 hover:border-indigo-400 text-slate-700 text-sm font-semibold transition-all">
+                                Capa 3: Red (Enrutamiento Lógico)
+                            </button>
+                            <button onclick="app.highlightDevices('enlace')" id="layer-enlace" class="layer-pill w-full text-left px-5 py-3.5 rounded-xl border border-slate-200 hover:border-indigo-400 text-slate-700 text-sm font-semibold transition-all">
+                                Capa 2: Enlace de Datos (Direccionamiento Físico MAC)
+                            </button>
+                            <button onclick="app.highlightDevices('fisica')" id="layer-fisica" class="layer-pill w-full text-left px-5 py-3.5 rounded-xl border border-slate-200 hover:border-indigo-400 text-slate-700 text-sm font-semibold transition-all">
+                                Capa 1: Física (Señales de Medios Físicos)
+                            </button>
                         </div>
-
-                        <div class="bg-slate-50 p-6 rounded-2xl border border-slate-200">
-                            <h3 class="font-bold text-slate-800 text-lg mb-4 flex items-center gap-2">
-                                <span>🛠️</span> Dispositivos Reales (Unidad 3)
-                            </h3>
-                            <div class="grid grid-cols-2 gap-4">
-                                <div class="device-card-box text-center p-4 rounded-xl border border-slate-200 bg-white" data-layer="superior">
-                                    <div class="text-3xl mb-1.5">🛡️</div>
-                                    <div class="font-extrabold text-xs text-slate-800">Firewalls Aplicativos</div>
-                                    <div class="text-[10px] text-slate-400 mt-1">Proxies, Gateways de Capa de Aplicación</div>
-                                </div>
-                                
-                                <div class="device-card-box text-center p-4 rounded-xl border border-slate-200 bg-white" data-layer="red">
-                                    <div class="text-3xl mb-1.5">🛣️</div>
-                                    <div class="font-extrabold text-xs text-slate-800">Routers y Switches L3</div>
-                                    <div class="text-[10px] text-slate-400 mt-1">Enrutadores inteligentes con direccionamiento IP</div>
-                                </div>
-                                
-                                <div class="device-card-box text-center p-4 rounded-xl border border-slate-200 bg-white" data-layer="enlace">
-                                    <div class="text-3xl mb-1.5">🔄</div>
-                                    <div class="font-extrabold text-xs text-slate-800">Switches & Bridges</div>
-                                    <div class="text-[10px] text-slate-400 mt-1">Conmutadores de tramas basados en MAC Address</div>
-                                </div>
-
-                                <div class="device-card-box text-center p-4 rounded-xl border border-slate-200 bg-white" data-layer="fisica">
-                                    <div class="text-3xl mb-1.5">🔌</div>
-                                    <div class="font-extrabold text-xs text-slate-800">Hubs & Repetidores</div>
-                                    <div class="text-[10px] text-slate-400 mt-1">Concentradores pasivos de bits y cables cobre/fibra</div>
-                                </div>
-                            </div>
-
-                            <div id="osi-feedback-panel" class="mt-6 p-4 rounded-xl bg-slate-100 text-xs text-slate-500 font-medium leading-relaxed italic text-center">
-                                Haz clic en cualquier capa del Modelo OSI a la izquierda para ver el hardware asociado.
-                            </div>
-                        </div>
-
                     </div>
+
+                    <div class="bg-slate-50 p-4 md:p-6 rounded-2xl border border-slate-200">
+                        <h3 class="font-bold text-slate-800 text-sm md:text-base mb-3">
+                            <span>🛠️</span> Dispositivos Reales (Unidad 3)
+                        </h3>
+                        <div class="grid grid-cols-2 gap-3">
+                            <div class="device-card-box text-center p-3 rounded-xl border border-slate-200 bg-white" data-layer="superior">
+                                <div class="text-2xl mb-1">🛡️</div>
+                                <div class="font-bold text-[11px] text-slate-800 leading-tight">Firewalls Aplicativos</div>
+                                <div class="text-[9px] text-slate-400 mt-0.5 leading-tight">Proxies, Gateways</div>
+                            </div>
+                            
+                            <div class="device-card-box text-center p-3 rounded-xl border border-slate-200 bg-white" data-layer="red">
+                                <div class="text-2xl mb-1">🛣️</div>
+                                <div class="font-bold text-[11px] text-slate-800 leading-tight">Routers y Switches L3</div>
+                                <div class="text-[9px] text-slate-400 mt-0.5 leading-tight">Enrutadores con IP</div>
+                            </div>
+                            
+                            <div class="device-card-box text-center p-3 rounded-xl border border-slate-200 bg-white" data-layer="enlace">
+                                <div class="text-2xl mb-1">🔄</div>
+                                <div class="font-bold text-[11px] text-slate-800 leading-tight">Switches & Bridges</div>
+                                <div class="text-[9px] text-slate-400 mt-0.5 leading-tight">Conmutadores de tramas MAC</div>
+                            </div>
+
+                            <div class="device-card-box text-center p-3 rounded-xl border border-slate-200 bg-white" data-layer="fisica">
+                                <div class="text-2xl mb-1">🔌</div>
+                                <div class="font-bold text-[11px] text-slate-800 leading-tight">Hubs & Repetidores</div>
+                                <div class="text-[9px] text-slate-400 mt-0.5 leading-tight">Medios de transmisión física</div>
+                            </div>
+                        </div>
+
+                        <div id="osi-feedback-panel" class="mt-4 p-3 rounded-xl bg-slate-100 text-[11px] text-slate-500 font-medium leading-normal italic text-center">
+                            Toca cualquier capa del Modelo OSI a la izquierda para visualizar el hardware que se le asocia en el temario.
+                        </div>
+                    </div>
+
                 </div>
             </div>
         </section>
@@ -820,12 +793,13 @@
 
                 // Cambiar estado visual de botones de navegación lateral
                 document.querySelectorAll('.nav-btn').forEach(el => {
-                    el.className = "nav-btn text-slate-600 hover:bg-slate-50 flex items-center gap-3 w-full text-left px-4 py-3 rounded-lg transition-colors whitespace-nowrap md:whitespace-normal";
+                    el.className = "nav-btn text-slate-600 hover:bg-slate-100/70 flex items-center gap-2.5 px-4 py-3 rounded-lg transition-colors whitespace-nowrap min-w-[130px] md:min-w-0 justify-center md:justify-start";
                 });
                 
                 const activeNav = document.getElementById('nav-' + viewId);
                 if (activeNav) {
-                    activeNav.className = "nav-btn bg-indigo-50 text-indigo-600 font-semibold border-r-4 border-indigo-600 flex items-center gap-3 w-full text-left px-4 py-3 rounded-lg transition-colors whitespace-nowrap md:whitespace-normal";
+                    // Adaptado para layouts horizontales móviles y verticales de escritorio
+                    activeNav.className = "nav-btn bg-indigo-50 text-indigo-600 font-semibold border-b-2 md:border-b-0 md:border-r-4 border-indigo-600 flex items-center gap-2.5 px-4 py-3 rounded-lg transition-colors whitespace-nowrap min-w-[130px] md:min-w-0 justify-center md:justify-start";
                 }
                 
                 // Forzar reconstrucción de gráficos en Dashboard
@@ -852,23 +826,21 @@
                     const pct = totalTopics > 0 ? Math.round((completed / totalTopics) * 100) : 0;
 
                     const card = document.createElement('button');
-                    card.className = `unit-card-btn w-full text-left bg-white p-4.5 rounded-xl border border-slate-200 hover:border-indigo-400 focus:outline-none flex flex-col gap-3 transition-all flex-shrink-0 lg:flex-shrink`;
+                    card.className = `unit-card-btn bg-white p-4.5 rounded-xl border border-slate-200 hover:border-indigo-400 focus:outline-none flex flex-col gap-3 transition-all flex-shrink-0 w-64 lg:w-full min-h-[110px] justify-between`;
                     card.id = `unit-card-${unit.id}`;
                     card.onclick = () => this.selectUnit(unit.id);
 
                     card.innerHTML = `
-                        <div class="flex items-center justify-between w-full">
-                            <div class="flex items-center gap-3">
-                                <span class="text-3xl bg-slate-50 p-2 rounded-xl shadow-inner">${unit.icon}</span>
-                                <div>
-                                    <span class="text-[10px] font-black text-indigo-600 uppercase tracking-widest">${unit.num}</span>
-                                    <h3 class="font-bold text-slate-800 leading-tight text-sm">${unit.title}</h3>
-                                </div>
+                        <div class="flex items-center gap-3 w-full">
+                            <span class="text-2xl bg-slate-50 p-2 rounded-xl shadow-inner">${unit.icon}</span>
+                            <div class="min-w-0 flex-1">
+                                <span class="text-[9px] font-black text-indigo-600 uppercase block tracking-wider">${unit.num}</span>
+                                <h3 class="font-bold text-slate-800 leading-tight text-xs truncate">${unit.title}</h3>
                             </div>
                         </div>
                         <div class="w-full">
-                            <div class="flex justify-between items-center text-[10px] text-slate-400 font-bold mb-1">
-                                <span>Progreso Unidad</span>
+                            <div class="flex justify-between items-center text-[9px] text-slate-400 font-bold mb-1">
+                                <span>Progreso</span>
                                 <span>${pct}%</span>
                             </div>
                             <div class="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
@@ -884,7 +856,11 @@
                 this.state.activeUnitId = id;
                 document.querySelectorAll('.unit-card-btn').forEach(card => card.classList.remove('selected'));
                 const selectedCard = document.getElementById(`unit-card-${id}`);
-                if (selectedCard) selectedCard.classList.add('selected');
+                if (selectedCard) {
+                    selectedCard.classList.add('selected');
+                    // Scroll suave automático en celular al seleccionar unidad
+                    selectedCard.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+                }
 
                 document.getElementById('detail-empty-state').classList.add('hidden');
                 document.getElementById('detail-active-state').classList.remove('hidden');
@@ -900,7 +876,7 @@
                 this.renderActivities(unit);
                 this.switchTab(this.state.activeTab);
 
-                // Si hay una consulta previa activa, actualizar los datos para la nueva unidad seleccionada
+                // Refrescar consulta de notas para esta unidad si ya se buscó alumno
                 const searchVal = document.getElementById('student-search-control').value.trim();
                 if (searchVal && this.state.studentsDatabase[searchVal]) {
                     this.displayGrades(searchVal);
@@ -911,11 +887,11 @@
                 this.state.activeTab = tabId;
                 document.querySelectorAll('.tab-panel').forEach(p => p.classList.add('hidden'));
                 document.querySelectorAll('button[id^="tab-"]').forEach(b => {
-                    b.className = "py-3 px-4 border-b-2 border-transparent text-sm font-semibold text-slate-600 hover:text-indigo-600 transition-colors whitespace-nowrap";
+                    b.className = "py-3 px-3.5 text-xs font-semibold text-slate-600 hover:text-indigo-600 whitespace-nowrap min-h-[44px]";
                 });
 
                 document.getElementById('panel-' + tabId).classList.remove('hidden');
-                document.getElementById('tab-' + tabId).className = "tab-btn-active py-3 px-4 border-b-2 border-indigo-600 text-sm font-semibold text-indigo-600 transition-colors whitespace-nowrap";
+                document.getElementById('tab-' + tabId).className = "tab-btn-active py-3 px-3.5 text-xs font-semibold text-indigo-600 border-b-2 border-indigo-600 whitespace-nowrap min-h-[44px]";
             },
 
             renderTopicsChecklist(unit) {
@@ -925,12 +901,15 @@
                 unit.topics.forEach((topic, idx) => {
                     const isChecked = this.state.completedTopics[topic];
                     const item = document.createElement('div');
-                    item.className = `flex items-start gap-3 p-3.5 rounded-xl border transition-all ${isChecked ? 'bg-indigo-50/50 border-indigo-200' : 'bg-slate-50/50 border-slate-200'}`;
+                    item.className = `flex items-center gap-3.5 p-3.5 rounded-xl border transition-all ${isChecked ? 'bg-indigo-50/50 border-indigo-200' : 'bg-slate-50/50 border-slate-200'}`;
                     item.innerHTML = `
-                        <input type="checkbox" id="topic-chk-${idx}" ${isChecked ? 'checked' : ''} 
-                            onchange="app.toggleTopic('${topic}', ${idx})" 
-                            class="mt-1 w-4 h-4 text-indigo-600 rounded focus:ring-indigo-500 border-slate-300 cursor-pointer">
-                        <label for="topic-chk-${idx}" class="text-xs font-semibold text-slate-700 leading-normal cursor-pointer select-none">
+                        <!-- Checkbox ampliado para targets móviles de Android (mínimo 24px) -->
+                        <div class="flex items-center justify-center min-w-[24px] min-h-[24px]">
+                            <input type="checkbox" id="topic-chk-${idx}" ${isChecked ? 'checked' : ''} 
+                                onchange="app.toggleTopic('${topic}', ${idx})" 
+                                class="w-5 h-5 text-indigo-600 rounded focus:ring-indigo-500 border-slate-300 cursor-pointer">
+                        </div>
+                        <label for="topic-chk-${idx}" class="text-xs font-semibold text-slate-700 leading-snug cursor-pointer select-none">
                             ${topic}
                         </label>
                     `;
@@ -954,6 +933,7 @@
                 const pct = total > 0 ? Math.round((completed / total) * 100) : 0;
 
                 document.getElementById('sidebar-progress-percent').innerText = `${pct}%`;
+                document.getElementById('sidebar-progress-percent-badge').innerText = `${pct}% Progreso`;
                 document.getElementById('sidebar-progress-bar').style.width = `${pct}%`;
                 document.getElementById('dashboard-progress-big').innerText = `${pct}%`;
             },
@@ -970,6 +950,9 @@
                     errorDiv.classList.add('hidden');
                     return;
                 }
+
+                // Ocultar teclado en Android después de presionar Buscar
+                inputEl.blur();
 
                 if (this.state.studentsDatabase[controlNum]) {
                     errorDiv.classList.add('hidden');
@@ -1024,11 +1007,11 @@
                 if (total >= 70) {
                     badgeEl.innerText = "Aprobado";
                     badgeEl.className = "block text-[10px] font-extrabold uppercase mt-1 px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 inline-block";
-                    totalEl.className = "text-3xl font-black text-emerald-600";
+                    totalEl.className = "text-xl md:text-2xl font-black text-emerald-600";
                 } else {
                     badgeEl.innerText = "No Aprobado";
                     badgeEl.className = "block text-[10px] font-extrabold uppercase mt-1 px-2 py-0.5 rounded bg-red-100 text-red-800 inline-block";
-                    totalEl.className = "text-3xl font-black text-red-600";
+                    totalEl.className = "text-xl md:text-2xl font-black text-red-600";
                 }
 
                 // Generar resumen semestral general (todas las unidades)
@@ -1063,20 +1046,15 @@
                     const data = new Uint8Array(e.target.result);
                     const workbook = XLSX.read(data, { type: 'array' });
                     
-                    // Tomamos la primera hoja del libro de Excel
                     const firstSheetName = workbook.SheetNames[0];
                     const worksheet = workbook.Sheets[firstSheetName];
-                    
-                    // Convertimos a JSON plano
                     const jsonData = XLSX.utils.sheet_to_json(worksheet);
 
                     if (jsonData.length === 0) return;
 
-                    // Limpiar base de datos para cargar la del profesor
                     const newDatabase = {};
 
                     jsonData.forEach(row => {
-                        // Buscamos mapear columnas de forma flexible
                         const control = row['Control'] || row['No_Control'] || row['Matrícula'] || row['matricula'] || Object.values(row)[0];
                         const name = row['Nombre'] || row['Estudiante'] || row['Alumno'] || Object.values(row)[1];
 
@@ -1124,24 +1102,17 @@
                         };
                     });
 
-                    // Actualizar estado de la app
                     app.state.studentsDatabase = newDatabase;
 
-                    // Mostrar notificación exitosa
                     const toast = document.getElementById('excel-toast');
                     toast.classList.remove('hidden');
-                    
-                    // Limpiar el valor del input para futuras cargas
                     event.target.value = '';
-
-                    // Si hay una consulta de búsqueda previa, refrescarla
                     app.queryGrades();
                 };
                 reader.readAsArrayBuffer(file);
             },
 
             downloadExcelTemplate() {
-                // Generar un CSV robusto compatible con Microsoft Excel en español usando codificación con BOM
                 const csvRows = [
                     "Control,Nombre,U1_Examen,U1_Practicas,U1_Actividades,U1_Apuntes,U1_Asistencia,U2_Examen,U2_Practicas,U2_Actividades,U2_Apuntes,U2_Asistencia,U3_Examen,U3_Practicas,U3_Actividades,U3_Apuntes,U3_Asistencia,U4_Examen,U4_Practicas,U4_Actividades,U4_Apuntes,U4_Asistencia,U5_Proyecto,U5_Practicas,U5_Actividades,U5_Apuntes,U5_Asistencia",
                     "22100001,Ana Sofia Guerrero Ruiz,95,100,95,90,100,90,85,100,95,100,85,95,90,100,100,100,90,95,90,100,95,100,95,100,100",
@@ -1150,8 +1121,6 @@
                 ];
 
                 const csvString = csvRows.join("\n");
-                
-                // BOM para garantizar compatibilidad con caracteres en español de Excel
                 const blob = new Blob(["\uFEFF" + csvString], { type: 'text/csv;charset=utf-8;' });
                 const url = URL.createObjectURL(blob);
                 
@@ -1208,7 +1177,7 @@
                             {
                                 label: 'Completado',
                                 data: completedByUnit,
-                                backgroundColor: '#10b981',
+                                backgroundColor: '#4f46e5',
                                 borderRadius: 6
                             },
                             {
