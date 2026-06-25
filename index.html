@@ -92,8 +92,8 @@
 </head>
 <body class="text-slate-800 h-screen flex flex-col md:flex-row overflow-hidden bg-slate-50">
 
-    <!-- MENÚ DE NAVEGACIÓN LATERAL (FIJO E INDEPENDIENTE) -->
-    <nav class="w-full md:w-68 bg-white border-r border-slate-200 flex flex-col shadow-sm z-10 flex-shrink-0">
+    <!-- MENÚ DE NAVEGACIÓN LATERAL (FIJO E INDEPENDIENTE CON ANCHO CORREGIDO A 72) -->
+    <nav class="w-full md:w-72 bg-white border-r border-slate-200 flex flex-col shadow-sm z-10 flex-shrink-0">
         <div class="p-5 border-b border-slate-200">
             <div class="flex items-center gap-2 mb-2">
                 <span class="text-2xl">⚡</span>
@@ -689,7 +689,7 @@
                     teaching: [
                         "Explorar a detalle las normas de cableado structured STP/UTP y seguridad física antes de operar equipos.",
                         "Demostrar el uso correcto de las herramientas físicas (ponchadoras, pelacables).",
-                        "Aplicar laboratorios virtuales y físicos para experimentar el trabajo que conlleva el diseño estructurado."
+                        "Aplicar laboratorios virtuales y físicos para experimentar el trabajo que conlleva el diseño de redes."
                     ],
                     topics: [
                         "4.1. Normas y estándares",
@@ -743,7 +743,6 @@
                 activeUnitId: null,
                 
                 // MOCK DATABASE DE ALUMNOS (PERIODO 2026)
-                // Se utiliza de forma nativa para que la vista previa no esté vacía por defecto
                 studentsDatabase: {
                     "22100001": {
                         nombre: "Ana Sofía Guerrero Ruiz",
@@ -761,7 +760,7 @@
                             1: { exam: 72, pract: 80, activ: 75, apuntes: 85, asist: 100 },
                             2: { exam: 80, pract: 75, activ: 80, apuntes: 90, asist: 90 },
                             3: { exam: 68, pract: 85, activ: 70, apuntes: 80, asist: 100 },
-                            4: { exam: 75, pract: 80, activ: 75, apuntes: 85, asist: 90 },
+                            4: { exam: 75, pract: 80, font: 75, apuntes: 85, asist: 90 },
                             5: { exam: 82, pract: 85, activ: 80, apuntes: 90, asist: 100 }
                         }
                     },
